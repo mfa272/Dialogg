@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.mfa272.dialogg.dto.PostDTO;
 import com.mfa272.dialogg.entities.Post;
-import com.mfa272.dialogg.entities.User;
+import com.mfa272.dialogg.entities.Account;
 import com.mfa272.dialogg.repositories.PostRepository;
 import com.mfa272.dialogg.repositories.AccountRepository;
 

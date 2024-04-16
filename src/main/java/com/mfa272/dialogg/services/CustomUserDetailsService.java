@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.mfa272.dialogg.entities.Account;
 import com.mfa272.dialogg.repositories.AccountRepository;
 
 @Service
@@ -27,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        com.mfa272.dialogg.entities.User user = userRepository.findByUsername(username)
+        Account user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         return new User(user.getUsername(), user.getPassword(), new ArrayList<>());

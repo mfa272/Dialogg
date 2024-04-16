@@ -20,8 +20,8 @@ public class Post {
     private LocalDateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reply> replies = new ArrayList<>();
@@ -29,9 +29,9 @@ public class Post {
     public Post() {
     }
 
-    public Post(String content, User user) {
+    public Post(String content, Account account) {
         this.content = content;
-        this.user = user;
+        this.account = account;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -59,12 +59,12 @@ public class Post {
         this.createdAt = createdAt;
     }
 
-    public User getUser() {
-        return user;
+    public Account getAccount() {
+        return account;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
     public List<Reply> getReplies() {

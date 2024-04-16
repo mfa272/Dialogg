@@ -21,8 +21,8 @@ import java.util.List;
 import jakarta.persistence.CascadeType;
 
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "accounts")
+public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,25 +39,25 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
-        name = "user_followers",
+        name = "account_followers",
         joinColumns = @JoinColumn(name = "followed_id"),
         inverseJoinColumns = @JoinColumn(name = "follower_id")
     )
-    private Set<User> followers = new HashSet<>();
+    private Set<Account> followers = new HashSet<>();
 
     @ManyToMany(mappedBy = "followers")
-    private Set<User> following = new HashSet<>();
+    private Set<Account> following = new HashSet<>();
 
-    public User() {
+    public Account() {
         this.createdAt = LocalDateTime.now();
     }
 
-    public User(String username, String email, String password) {
+    public Account(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
@@ -83,11 +83,11 @@ public class User {
         return createdAt;
     }
 
-    public Set<User> getFollowers() {
+    public Set<Account> getFollowers() {
         return followers;
     }
 
-    public Set<User> getFollowing() {
+    public Set<Account> getFollowing() {
         return following;
     }
 
@@ -111,19 +111,19 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    public void addFollower(User user) {
+    public void addFollower(Account user) {
         this.followers.add(user);
     }
 
-    public void removeFollower(User user) {
+    public void removeFollower(Account user) {
         this.followers.remove(user);
     }
 
-    public void addFollowing(User user) {
+    public void addFollowing(Account user) {
         this.following.add(user);
     }
 
-    public void removeFollowing(User user) {
+    public void removeFollowing(Account user) {
         this.following.remove(user);
     }
 }

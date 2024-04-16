@@ -1,6 +1,6 @@
 package com.mfa272.dialogg.services;
 
-import com.mfa272.dialogg.entities.User;
+import com.mfa272.dialogg.entities.Account;
 import com.mfa272.dialogg.repositories.AccountRepository;
 import com.mfa272.dialogg.dto.DialoggUserRegistrationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class AccountService {
 
     public enum RegistrationResult {
         SUCCESS,
@@ -21,14 +21,14 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(AccountRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AccountService(AccountRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     public RegistrationResult registerUser(DialoggUserRegistrationDTO userDTO) {
-        Optional<User> userByEmail = userRepository.findByEmail(userDTO.getEmail());
-        Optional<User> userByUsername = userRepository.findByUsername(userDTO.getUsername());
+        Optional<Account> userByEmail = userRepository.findByEmail(userDTO.getEmail());
+        Optional<Account> userByUsername = userRepository.findByUsername(userDTO.getUsername());
         
         if (userByEmail.isPresent()) {
             return RegistrationResult.EMAIL_TAKEN;
@@ -38,7 +38,7 @@ public class UserService {
             return RegistrationResult.USERNAME_TAKEN;
         }
         
-        User user = new User();
+        Account user = new Account();
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword())); 

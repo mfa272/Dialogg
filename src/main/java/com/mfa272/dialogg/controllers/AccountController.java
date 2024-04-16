@@ -1,8 +1,8 @@
 package com.mfa272.dialogg.controllers;
 
 import com.mfa272.dialogg.dto.DialoggUserRegistrationDTO;
-import com.mfa272.dialogg.services.UserService;
-import com.mfa272.dialogg.services.UserService.RegistrationResult;
+import com.mfa272.dialogg.services.AccountService;
+import com.mfa272.dialogg.services.AccountService.RegistrationResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,12 +17,12 @@ import jakarta.validation.Valid;
 
 
 @Controller
-public class UserController {
+public class AccountController {
 
-    private UserService userService;
+    private AccountService userService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public AccountController(AccountService userService) {
         this.userService = userService;
     }
 
