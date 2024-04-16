@@ -7,15 +7,15 @@ import com.mfa272.dialogg.dto.PostDTO;
 import com.mfa272.dialogg.entities.Post;
 import com.mfa272.dialogg.entities.User;
 import com.mfa272.dialogg.repositories.PostRepository;
-import com.mfa272.dialogg.repositories.UserRepository;
+import com.mfa272.dialogg.repositories.AccountRepository;
 
 @Service
 public class PostService {
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
+    private final AccountRepository userRepository;
 
     @Autowired
-    public PostService(PostRepository postRepository, UserRepository userRepository){
+    public PostService(PostRepository postRepository, AccountRepository userRepository){
         this.postRepository = postRepository;
         this.userRepository = userRepository;
     }

@@ -1,7 +1,5 @@
 package com.mfa272.dialogg.dto;
 
-import com.mfa272.dialogg.entities.User;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
