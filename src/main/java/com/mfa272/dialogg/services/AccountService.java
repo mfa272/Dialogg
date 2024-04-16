@@ -2,7 +2,7 @@ package com.mfa272.dialogg.services;
 
 import com.mfa272.dialogg.entities.Account;
 import com.mfa272.dialogg.repositories.AccountRepository;
-import com.mfa272.dialogg.dto.DialoggUserRegistrationDTO;
+import com.mfa272.dialogg.dto.AccountRegistrationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class AccountService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public RegistrationResult registerUser(DialoggUserRegistrationDTO userDTO) {
+    public RegistrationResult registerUser(AccountRegistrationDTO userDTO) {
         Optional<Account> userByEmail = userRepository.findByEmail(userDTO.getEmail());
         Optional<Account> userByUsername = userRepository.findByUsername(userDTO.getUsername());
         

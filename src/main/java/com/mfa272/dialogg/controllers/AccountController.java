@@ -1,6 +1,6 @@
 package com.mfa272.dialogg.controllers;
 
-import com.mfa272.dialogg.dto.DialoggUserRegistrationDTO;
+import com.mfa272.dialogg.dto.AccountRegistrationDTO;
 import com.mfa272.dialogg.services.AccountService;
 import com.mfa272.dialogg.services.AccountService.RegistrationResult;
 
@@ -33,12 +33,12 @@ public class AccountController {
     
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
-        model.addAttribute("user", new DialoggUserRegistrationDTO());
+        model.addAttribute("user", new AccountRegistrationDTO());
         return "register";
     }
 
     @PostMapping("/register")
-    public String registerUserAccount(@ModelAttribute("user") @Valid DialoggUserRegistrationDTO userDto,
+    public String registerUserAccount(@ModelAttribute("user") @Valid AccountRegistrationDTO userDto,
                                       BindingResult result,
                                       RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
