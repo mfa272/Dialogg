@@ -12,6 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -24,9 +26,10 @@ class UserAuthenticationTests {
 	void succesfulRegistration() throws Exception {
 		mockMvc.perform(post("/register")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.param("username", "test")
+				.param("username", "testtest")
 				.param("email", "test@test.test")
-				.param("password", "password"))
+				.param("password", "password")
+				.with(csrf()))
 				.andExpect(status().is3xxRedirection())
 				.andExpect(view().name("redirect:/login"))
 				.andExpect(flash().attribute("successMessage", "You have successfully registered!"));
@@ -37,15 +40,17 @@ class UserAuthenticationTests {
 
 		mockMvc.perform(post("/register")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.param("username", "test")
+				.param("username", "testtest")
 				.param("email", "test@test.test")
-				.param("password", "password"));
+				.param("password", "password")
+				.with(csrf()));
 
 		mockMvc.perform(post("/register")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.param("username", "test")
+				.param("username", "testtest")
 				.param("email", "nottest@nottest.nottest")
-				.param("password", "password"))
+				.param("password", "password")
+				.with(csrf()))
 				.andExpect(status().isOk())
 				.andExpect(view().name("register"))
 				.andExpect(model().attributeHasFieldErrors("user", "username"));
@@ -56,17 +61,38 @@ class UserAuthenticationTests {
 
 		mockMvc.perform(post("/register")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.param("username", "test")
+				.param("username", "testtest")
 				.param("email", "test@test.test")
-				.param("password", "password"));
+				.param("password", "password")
+				.with(csrf()));
 
 		mockMvc.perform(post("/register")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.param("username", "nottest")
 				.param("email", "test@test.test")
-				.param("password", "password"))
+				.param("password", "password")
+				.with(csrf()))
 				.andExpect(status().isOk())
 				.andExpect(view().name("register"))
 				.andExpect(model().attributeHasFieldErrors("user", "email"));
+	}
+
+	@Test
+	void successfulLogin() throws Exception {
+		mockMvc.perform(post("/register")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.param("username", "testtest")
+				.param("email", "test@test.test")
+				.param("password", "password")
+				.with(csrf()));
+
+		mockMvc.perform(post("/login")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.param("username", "testtest")
+				.param("password", "password")
+				.with(csrf()))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrl("/posts/new"));
+
 	}
 }

@@ -6,7 +6,6 @@
 </head>
 
 <body>
-
     <div th:if="${successMessage}" th:text="${successMessage}"></div>
     <form th:action="@{/login}" method="post">
         <label for="username">Username:</label>
@@ -17,7 +16,6 @@
 
         <input type="submit" value="Login">
     </form>
-
 </body>
 
 </html>
