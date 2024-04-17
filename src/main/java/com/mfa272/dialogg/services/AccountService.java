@@ -47,4 +47,8 @@ public class AccountService {
 
         return RegistrationResult.SUCCESS;
     }
+
+    public Optional<Account> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
 }

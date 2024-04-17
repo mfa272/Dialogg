@@ -1,6 +1,8 @@
 package com.mfa272.dialogg.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -36,8 +38,9 @@ public class PostController {
             RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "createPost";
-        }
-        postService.createPost(postDTO);
+        }Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName(); // Get the current logged-in username
+        postService.createPost(postDTO, currentUsername);
         return "redirect:/posts";
     }
 

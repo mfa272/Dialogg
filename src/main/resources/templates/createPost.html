@@ -9,11 +9,7 @@
 <body>
     dialogg
     <form th:action="@{/posts/new}" th:object="${post}" method="post">
-        Username
-        <input type="text" id="username" th:field="*{username}">
-        <div class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}" />
-        <br>
-        Post
+        Post content
         <input type="text" id="content" th:field="*{content}">
         <div class="error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}" />
         <button>Submit</button>

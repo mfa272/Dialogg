@@ -1,16 +1,23 @@
 package com.mfa272.dialogg.controllers;
 
 import com.mfa272.dialogg.dto.AccountRegistrationDTO;
+import com.mfa272.dialogg.dto.PostDTO;
+import com.mfa272.dialogg.entities.Account;
+import com.mfa272.dialogg.entities.Post;
 import com.mfa272.dialogg.services.AccountService;
 import com.mfa272.dialogg.services.AccountService.RegistrationResult;
+import com.mfa272.dialogg.services.PostService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
@@ -19,11 +26,13 @@ import jakarta.validation.Valid;
 @Controller
 public class AccountController {
 
-    private AccountService userService;
-
+    private AccountService accountService;
+    private PostService postService;
+    
     @Autowired
-    public AccountController(AccountService userService) {
-        this.userService = userService;
+    public AccountController(AccountService userService, PostService postService) {
+        this.accountService = userService;
+        this.postService = postService;
     }
 
     @GetMapping("/login")
@@ -44,7 +53,7 @@ public class AccountController {
         if (result.hasErrors()) {
             return "register";
         }
-        RegistrationResult registered = userService.registerUser(userDto);
+        RegistrationResult registered = accountService.registerUser(userDto);
         if (registered == RegistrationResult.USERNAME_TAKEN) {
             result.rejectValue("username", "user.username", "This username is already taken");
             return "register";
@@ -55,5 +64,14 @@ public class AccountController {
         }
         redirectAttributes.addFlashAttribute("successMessage", "You have successfully registered!");
         return "redirect:/login";
+    }
+
+    @GetMapping("/profile/{username}")
+    public String userProfile(@PathVariable String username, Model model, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "1") int size) {
+        Account account = accountService.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        Page<PostDTO> posts = postService.getPostsByUser(username, page, size);
+        model.addAttribute("account", account);
+        model.addAttribute("posts", posts);
+        return "profile";
     }
 }

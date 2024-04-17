@@ -1,5 +1,7 @@
 package com.mfa272.dialogg.dto;
 
+import java.time.LocalDateTime;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -10,6 +12,16 @@ public class PostDTO {
     private String content;
 
     private String username;
+
+    private LocalDateTime createdAt;
+
+    public String getCreatedAt() {
+        return createdAt.toString();
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
     public String getContent() {
         return content;
