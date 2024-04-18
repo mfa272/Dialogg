@@ -25,8 +25,7 @@ dependencies {
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	// H2 Database for testing
-	testImplementation 'com.h2database:h2' // Use the latest version available
+	testImplementation 'com.h2database:h2'
 }
 
 tasks.named('test') {

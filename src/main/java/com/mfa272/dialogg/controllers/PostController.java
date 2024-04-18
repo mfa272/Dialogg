@@ -38,10 +38,11 @@ public class PostController {
             RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "createPost";
-        }Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName(); // Get the current logged-in username
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
         postService.createPost(postDTO, currentUsername);
-        return "redirect:/posts";
+        return "redirect:/" + currentUsername;
     }
 
     @GetMapping("/posts")

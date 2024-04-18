@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <div th:fragment="submitPost">
+        <form th:action="@{/posts/new}" th:object="${newPost}" method="post">
+            Post content
+            <input type="text" id="content" th:field="*{content}">
+            <div class="error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}" />
+            <button>Submit</button>
+        </form>
+    </div>
+</body>
+
+</html>

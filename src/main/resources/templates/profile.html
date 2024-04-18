@@ -1,25 +1,26 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
     <title>User Profile</title>
 </head>
+
 <body>
-    <h1>User Profile: <span th:text="${account.username}"></span></h1>
-    <div>
-        <h2>Posts</h2>
-        <div>
-            <div th:each="post : ${posts}">
-                <div class="post">
-                    <p th:text="${post.content}"></p>
-                    <small th:text="${post.createdAt}"></small>
-                </div>
-            </div>
-        </div>
-        <!-- Pagination Link -->
-        <div th:if="${posts.hasNext()}">
-            <a th:href="@{/profile/{username}(username=${account.username}, page=${posts.number + 1}, size=10)}">Load More</a>
-        </div>
+    <div th:text="${account.username}"></div>
+    <div th:if="${account.username == #authentication.name}" th:insert="fragments.html :: submitPost"></div>
+    <div th:unless="${account.username == #authentication.name}">
+        follow!
     </div>
+    Posts
+    <div th:each="post : ${posts}">
+            <div th:text="${post.content}"></div>
+            <div th:text="${post.createdAt}"></div>
+    </div>
+    <div th:if="${posts.hasNext()}">
+        <a th:href="@{/{username}(username=${account.username}, page=${posts.number + 1})}">Load More</a>
+    </div>
+    <div th:if="${posts.number > 0}"> <a
+            th:href="@{/{username}(username=${account.username}, page=${posts.number - 1})}">Back</a></div>
 </body>
+
 </html>

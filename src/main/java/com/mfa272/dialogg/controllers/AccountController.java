@@ -3,7 +3,6 @@ package com.mfa272.dialogg.controllers;
 import com.mfa272.dialogg.dto.AccountRegistrationDTO;
 import com.mfa272.dialogg.dto.PostDTO;
 import com.mfa272.dialogg.entities.Account;
-import com.mfa272.dialogg.entities.Post;
 import com.mfa272.dialogg.services.AccountService;
 import com.mfa272.dialogg.services.AccountService.RegistrationResult;
 import com.mfa272.dialogg.services.PostService;
@@ -66,11 +65,12 @@ public class AccountController {
         return "redirect:/login";
     }
 
-    @GetMapping("/profile/{username}")
-    public String userProfile(@PathVariable String username, Model model, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "1") int size) {
+    @GetMapping("/{username}")
+    public String userProfile(@PathVariable String username, Model model, @RequestParam(defaultValue = "0") int page) {
         Account account = accountService.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        Page<PostDTO> posts = postService.getPostsByUser(username, page, size);
+        Page<PostDTO> posts = postService.getPostsByUser(username, page, 10);
         model.addAttribute("account", account);
+        model.addAttribute("newPost", new PostDTO()); 
         model.addAttribute("posts", posts);
         return "profile";
     }
