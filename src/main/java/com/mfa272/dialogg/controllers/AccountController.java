@@ -34,6 +34,11 @@ public class AccountController {
         this.postService = postService;
     }
 
+    @GetMapping("/")
+    public String showHome(Model model) {
+        return "home";
+    }
+
     @GetMapping("/login")
     public String showLoginPage(Model model){
         return "login";
