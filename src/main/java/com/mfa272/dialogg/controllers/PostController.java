@@ -1,6 +1,7 @@
 package com.mfa272.dialogg.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -39,6 +40,9 @@ public class PostController {
             return "createPost";
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof AnonymousAuthenticationToken){
+            return "redirect:/login";
+        }
         String currentUsername = authentication.getName();
         postService.createPost(postDTO, currentUsername);
         return "redirect:/" + currentUsername;
