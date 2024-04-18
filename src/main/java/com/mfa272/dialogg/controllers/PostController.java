@@ -13,7 +13,6 @@ import com.mfa272.dialogg.services.PostService;
 
 import jakarta.validation.Valid;
 
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -27,29 +26,19 @@ public class PostController {
         this.postService = postService;
     }
 
-    @GetMapping("/posts/new")
-    public String showCreatePostForm(Model model) {
-        model.addAttribute("post", new PostDTO());
-        return "createPost";
-    }
-
-    @PostMapping("/posts/new")
-    public String createPost(@ModelAttribute("post") @Valid PostDTO postDTO, BindingResult result,
+    @PostMapping("/new")
+    public String createPost(@ModelAttribute("newPost") @Valid PostDTO postDTO, BindingResult result,
             RedirectAttributes redirectAttributes) {
-        if (result.hasErrors()) {
-            return "createPost";
-        }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof AnonymousAuthenticationToken){
             return "redirect:/login";
         }
         String currentUsername = authentication.getName();
-        postService.createPost(postDTO, currentUsername);
+        if (!result.hasErrors()) {
+            postService.createPost(postDTO, currentUsername);
+        }else{
+            redirectAttributes.addFlashAttribute("content", result.getFieldError("content").getDefaultMessage());
+        }
         return "redirect:/" + currentUsername;
-    }
-
-    @GetMapping("/posts")
-    public String showPosts(Model model){
-        return "posts";
     }
 }

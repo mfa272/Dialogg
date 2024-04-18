@@ -3,10 +3,11 @@
 
 <body>
     <div th:fragment="submitPost">
-        <form th:action="@{/posts/new}" th:object="${newPost}" method="post">
+        <form th:action="@{/new}" th:object="${newPost}" method="post">
+            <div th:text="${newPost.content}"></div>
             Post content
             <input type="text" id="content" th:field="*{content}">
-            <div class="error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}" />
+            <div class="error" th:if="${content}" th:text="${content}" />
             <button>Submit</button>
         </form>
     </div>
