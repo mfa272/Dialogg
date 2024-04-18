@@ -13,7 +13,6 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -58,9 +57,9 @@ public class PostTests {
                         mockMvc.perform(post("/new")
                                         .session(session)
                                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                                        .param("content",  String.valueOf(i))
+                                        .param("content", String.valueOf(i))
                                         .with(csrf()));
-                    }
+                }
         }
 
         @Test
@@ -86,7 +85,7 @@ public class PostTests {
         }
 
         @Test
-        void fetchSecondPage() throws Exception{
+        void fetchSecondPage() throws Exception {
                 MvcResult result = mockMvc.perform(get("/{username}", username)
                                 .session(session)
                                 .param("page", "1"))
@@ -95,7 +94,7 @@ public class PostTests {
 
                 String content = result.getResponse().getContentAsString();
                 for (int i = 10; i > 0; i--) {
-                        assert(content.contains("<div>" + String.valueOf(i) + "</div>"));
+                        assert (content.contains("<div>" + String.valueOf(i) + "</div>"));
                 }
         }
 }
