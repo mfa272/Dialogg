@@ -30,13 +30,13 @@ public class PostController {
     public String createPost(@ModelAttribute("newPost") @Valid PostDTO postDTO, BindingResult result,
             RedirectAttributes redirectAttributes) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken){
+        if (authentication instanceof AnonymousAuthenticationToken) {
             return "redirect:/login";
         }
         String currentUsername = authentication.getName();
         if (!result.hasErrors()) {
             postService.createPost(postDTO, currentUsername);
-        }else{
+        } else {
             redirectAttributes.addFlashAttribute("content", result.getFieldError("content").getDefaultMessage());
         }
         return "redirect:/" + currentUsername;
