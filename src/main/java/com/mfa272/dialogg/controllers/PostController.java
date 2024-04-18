@@ -8,7 +8,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
 import com.mfa272.dialogg.dto.PostDTO;
-import com.mfa272.dialogg.entities.Post;
 import com.mfa272.dialogg.services.PostService;
 
 import jakarta.validation.Valid;
