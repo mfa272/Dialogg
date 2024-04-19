@@ -21,13 +21,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 
-
 @Controller
 public class AccountController {
 
     private AccountService accountService;
     private PostService postService;
-    
+
     @Autowired
     public AccountController(AccountService userService, PostService postService) {
         this.accountService = userService;
@@ -40,10 +39,10 @@ public class AccountController {
     }
 
     @GetMapping("/login")
-    public String showLoginPage(Model model){
+    public String showLoginPage(Model model) {
         return "login";
     }
-    
+
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         model.addAttribute("user", new AccountRegistrationDTO());
@@ -52,8 +51,8 @@ public class AccountController {
 
     @PostMapping("/register")
     public String registerUserAccount(@ModelAttribute("user") @Valid AccountRegistrationDTO userDto,
-                                      BindingResult result,
-                                      RedirectAttributes redirectAttributes) {
+            BindingResult result,
+            RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "register";
         }
@@ -72,11 +71,13 @@ public class AccountController {
 
     @GetMapping("/{username}")
     public String userProfile(@PathVariable String username, Model model, @RequestParam(defaultValue = "0") int page) {
-        Account account = accountService.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        Page<PostDTO> posts = postService.getPostsByUser(username, page, 10);
-        model.addAttribute("account", account);
-        model.addAttribute("newPost", new PostDTO()); 
-        model.addAttribute("posts", posts);
-        return "profile";
+        if (accountService.UserExists(username)) {
+            Page<PostDTO> posts = postService.getPostsByUser(username, page, 10);
+            model.addAttribute("username", username);
+            model.addAttribute("newPost", new PostDTO());
+            model.addAttribute("posts", posts);
+            return "profile";
+        }
+        return "/";
     }
 }

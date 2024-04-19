@@ -5,7 +5,6 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
 import com.mfa272.dialogg.dto.PostDTO;
@@ -37,7 +36,9 @@ public class PostController {
         if (!result.hasErrors()) {
             postService.createPost(postDTO, currentUsername);
         } else {
-            redirectAttributes.addFlashAttribute("content", result.getFieldError("content").getDefaultMessage());
+            redirectAttributes
+                    .addFlashAttribute("content", result.getFieldError("content")
+                            .getDefaultMessage());
         }
         return "redirect:/" + currentUsername;
     }

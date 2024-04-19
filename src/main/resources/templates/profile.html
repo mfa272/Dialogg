@@ -6,9 +6,9 @@
 </head>
 
 <body>
-    <div th:text="${account.username}"></div>
-    <div th:if="${account.username == #authentication.name}" th:insert="fragments.html :: submitPost"></div>
-    <div th:unless="${account.username == #authentication.name}">
+    <div th:text="${username}"></div>
+    <div th:if="${username == #authentication.name}" th:insert="fragments.html :: submitPost"></div>
+    <div th:unless="${username == #authentication.name}">
         follow!
     </div>
     Posts
@@ -17,10 +17,10 @@
             <div th:text="${post.createdAt}"></div>
     </div>
     <div th:if="${posts.hasNext()}">
-        <a th:href="@{/{username}(username=${account.username}, page=${posts.number + 1})}">Load More</a>
+        <a th:href="@{/{username}(username=${username}, page=${posts.number + 1})}">Load More</a>
     </div>
     <div th:if="${posts.number > 0}"> <a
-            th:href="@{/{username}(username=${account.username}, page=${posts.number - 1})}">Back</a></div>
+            th:href="@{/{username}(username=${username}, page=${posts.number - 1})}">Back</a></div>
 </body>
 
 </html>
