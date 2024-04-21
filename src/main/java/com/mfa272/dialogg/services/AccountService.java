@@ -5,7 +5,7 @@ import com.mfa272.dialogg.repositories.AccountRepository;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import com.mfa272.dialogg.dto.AccountRegistrationDTO;
+import com.mfa272.dialogg.dto.AccountDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +32,7 @@ public class AccountService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public RegistrationResult registerUser(AccountRegistrationDTO userDTO) {
+    public RegistrationResult registerUser(AccountDTO userDTO) {
         Optional<Account> userByEmail = userRepository.findByEmail(userDTO.getEmail());
         Optional<Account> userByUsername = userRepository.findByUsername(userDTO.getUsername());
 
@@ -96,19 +96,19 @@ public class AccountService {
         return false;
     }
 
-    public Page<AccountRegistrationDTO> getFollowers(String username, int page, int size){
+    public Page<AccountDTO> getFollowers(String username, int page, int size){
         Page<Account> followers = userRepository.findFollowersByUsername(username, PageRequest.of(page, size));
         return followers.map(f -> {
-            AccountRegistrationDTO dto = new AccountRegistrationDTO();
+            AccountDTO dto = new AccountDTO();
             dto.setUsername(f.getUsername());
             return dto;
         });
     }
 
-    public Page<AccountRegistrationDTO> getFollowing(String username, int page, int size){
+    public Page<AccountDTO> getFollowing(String username, int page, int size){
         Page<Account> followers = userRepository.findFollowingByUsername(username, PageRequest.of(page, size));
         return followers.map(f -> {
-            AccountRegistrationDTO dto = new AccountRegistrationDTO();
+            AccountDTO dto = new AccountDTO();
             dto.setUsername(f.getUsername());
             return dto;
         });
