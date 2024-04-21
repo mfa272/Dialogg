@@ -3,7 +3,6 @@ package com.mfa272.dialogg.controllers;
 import com.mfa272.dialogg.dto.AccountDTO;
 import com.mfa272.dialogg.dto.PostDTO;
 import com.mfa272.dialogg.services.AccountService;
-import com.mfa272.dialogg.services.AccountService.RegistrationResult;
 import com.mfa272.dialogg.services.PostService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,24 +12,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import jakarta.validation.Valid;
 
 @Controller
-public class AccountController {
+public class PagesController {
 
     private AccountService accountService;
     private PostService postService;
 
     @Autowired
-    public AccountController(AccountService userService, PostService postService) {
+    public PagesController(AccountService userService, PostService postService) {
         this.accountService = userService;
         this.postService = postService;
     }
@@ -38,37 +31,6 @@ public class AccountController {
     @GetMapping("/")
     public String showHome(Model model) {
         return "home";
-    }
-
-    @GetMapping("/login")
-    public String showLoginPage(Model model) {
-        return "login";
-    }
-
-    @GetMapping("/register")
-    public String showRegistrationForm(Model model) {
-        model.addAttribute("user", new AccountDTO());
-        return "register";
-    }
-
-    @PostMapping("/register")
-    public String registerUserAccount(@ModelAttribute("user") @Valid AccountDTO userDto,
-            BindingResult result,
-            RedirectAttributes redirectAttributes) {
-        if (result.hasErrors()) {
-            return "register";
-        }
-        RegistrationResult registered = accountService.registerUser(userDto);
-        if (registered == RegistrationResult.USERNAME_TAKEN) {
-            result.rejectValue("username", "user.username", "This username is already taken");
-            return "register";
-        }
-        if (registered == RegistrationResult.EMAIL_TAKEN) {
-            result.rejectValue("email", "user.email", "An account already exists for this email");
-            return "register";
-        }
-        redirectAttributes.addFlashAttribute("successMessage", "You have successfully registered!");
-        return "redirect:/login";
     }
 
     @GetMapping("/{username}")
@@ -117,27 +79,5 @@ public class AccountController {
             return "followed";
         }
         return "/";
-    }
-
-    @PostMapping("/follow/{username}")
-    public String followAccount(@PathVariable String username) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            return "redirect:/login";
-        }
-        String currentUsername = authentication.getName();
-        accountService.follow(currentUsername, username);
-        return "redirect:/" + username;
-    }
-
-    @PostMapping("/unfollow/{username}")
-    public String unfollowAccount(@PathVariable String username) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            return "redirect:/login";
-        }
-        String currentUsername = authentication.getName();
-        accountService.unfollow(currentUsername, username);
-        return "redirect:/" + username;
     }
 }
