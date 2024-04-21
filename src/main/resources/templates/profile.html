@@ -9,18 +9,41 @@
     <div th:text="${username}"></div>
     <div th:if="${username == #authentication.name}" th:insert="fragments.html :: submitPost"></div>
     <div th:unless="${username == #authentication.name}">
-        follow!
+        <div th:if="${following}">
+            <form th:action="@{/unfollow/{username}(username=${username})}" method="post">
+                <button>Unfollow!</button>
+            </form>
+        </div>
+        <div th:unless="${following}">
+            <form th:action="@{/follow/{username}(username=${username})}" method="post">
+                <button>Follow!</button>
+            </form>
+        </div>
     </div>
     Posts
     <div th:each="post : ${posts}">
-            <div th:text="${post.content}"></div>
-            <div th:text="${post.createdAt}"></div>
+        <div th:text="${post.content}"></div>
+        <div th:text="${post.createdAt}"></div>
     </div>
     <div th:if="${posts.hasNext()}">
         <a th:href="@{/{username}(username=${username}, page=${posts.number + 1})}">Load More</a>
     </div>
     <div th:if="${posts.number > 0}"> <a
             th:href="@{/{username}(username=${username}, page=${posts.number - 1})}">Back</a></div>
+    <br>
+    <a th:href="@{/{username}/followers(username=${username})}">Followers</a>
+    <div th:each="follower : ${followers}">
+        <a th:href="@{/{username}(username=${follower.username})}">
+            <div th:text="${follower.username}"></div>
+        </a>
+    </div>
+    <br>
+    <a th:href="@{/{username}/followed(username=${username})}">Following</a>
+    <div th:each="follow : ${followed}">
+        <a th:href="@{/{username}(username=${follow.username})}">
+            <div th:text="${follow.username}"></div>
+        </a>
+    </div>
 </body>
 
 </html>
