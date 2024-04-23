@@ -1,8 +1,9 @@
 package com.mfa272.dialogg.controllers;
 
 import com.mfa272.dialogg.dto.AccountDTO;
-import com.mfa272.dialogg.dto.AccountDTO.UpdateEmail;
-import com.mfa272.dialogg.dto.AccountDTO.UpdatePassword;
+import com.mfa272.dialogg.dto.AccountDTO.RegistrationForm;
+import com.mfa272.dialogg.dto.AccountDTO.UpdateEmailForm;
+import com.mfa272.dialogg.dto.AccountDTO.UpdatePasswordForm;
 import com.mfa272.dialogg.services.AccountService;
 import com.mfa272.dialogg.services.AccountService.OperationResult;
 import com.mfa272.dialogg.services.PostService;
@@ -46,7 +47,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public String registerUserAccount(@ModelAttribute("user") @Valid AccountDTO userDto,
+    public String registerUserAccount(@ModelAttribute("user") @Validated({RegistrationForm.class}) AccountDTO userDto,
             BindingResult result,
             RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
@@ -54,11 +55,11 @@ public class AuthenticationController {
         }
         OperationResult registered = accountService.registerUser(userDto);
         if (registered == OperationResult.USERNAME_TAKEN) {
-            result.rejectValue("username", "user.username", "This username is already taken");
+            result.rejectValue("username", "user.username", "Username already taken");
             return "register";
         }
         if (registered == OperationResult.EMAIL_TAKEN) {
-            result.rejectValue("email", "user.email", "An account already exists for this email");
+            result.rejectValue("email", "user.email", "Email already taken");
             return "register";
         }
         redirectAttributes.addFlashAttribute("successMessage", "You have successfully registered!");
@@ -75,7 +76,7 @@ public class AuthenticationController {
     }
     
     @PostMapping("/updateEmail")
-    public String updateEmail(@ModelAttribute("user") @Validated({UpdateEmail.class}) AccountDTO accountDto, BindingResult result, RedirectAttributes redirectAttributes) {
+    public String updateEmail(@ModelAttribute("user") @Validated({UpdateEmailForm.class}) AccountDTO accountDto, BindingResult result, RedirectAttributes redirectAttributes) {
         Optional<String> username = getCurrentUsername();
         if (result.hasErrors()) {
             accountDto.setCurrentEmail(accountService.getEmailByUsername(username.get()));
@@ -96,7 +97,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/updatePassword")
-    public String updatePassword(@ModelAttribute("user") @Validated({UpdatePassword.class}) AccountDTO accountDto, BindingResult result, RedirectAttributes redirectAttributes) {
+    public String updatePassword(@ModelAttribute("user") @Validated({UpdatePasswordForm.class}) AccountDTO accountDto, BindingResult result, RedirectAttributes redirectAttributes) {
         Optional<String> username = getCurrentUsername();
         if (result.hasErrors()) {
             accountDto.setCurrentEmail(accountService.getEmailByUsername(username.get()));

@@ -9,11 +9,11 @@
     dialogg
     <form th:action="@{/register}" th:object="${user}" method="post">
         Username
-        <input type="text" id="username" th:field="*{username}">
+        <input id="username" th:field="*{username}">
         <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" />
         <br>
         Email
-        <input type="email" id="email" th:field="*{email}">
+        <input id="email" th:field="*{email}">
         <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" />
         <br>
         Password

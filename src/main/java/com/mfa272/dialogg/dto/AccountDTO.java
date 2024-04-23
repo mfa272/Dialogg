@@ -7,32 +7,34 @@ import jakarta.validation.constraints.Size;
 
 public class AccountDTO {
 
-    public interface Registration {
+    public interface RegistrationForm {
     }
 
-    public interface UpdateEmail {
+    public interface UpdateEmailForm {
     }
 
-    public interface UpdatePassword {
+    public interface UpdatePasswordForm {
     }
 
-    @Size(max = 16, message = "Maximum 16 characters", groups = {Registration.class})
-    @Size(min = 6, message = "Minimum 6 characters", groups = {Registration.class})
-    @NotBlank(message = "Username is required", groups = {Registration.class})
-    @Pattern(regexp = "^[\\S]*$", message = "Username must not contain whitespaces", groups = {Registration.class})
+    @Size(max = 16, message = "Maximum 16 characters", groups = { RegistrationForm.class })
+    @Size(min = 6, message = "Minimum 6 characters", groups = { RegistrationForm.class })
+    @NotBlank(message = "Username is required", groups = { RegistrationForm.class })
+    @Pattern(regexp = "^[\\S]*$", message = "Username must not contain whitespaces", groups = {
+            RegistrationForm.class })
     private String username;
 
-    @Email(message = "Please provide a valid email", groups = {UpdateEmail.class})
-    @NotBlank(message = "Email is required", groups = {UpdateEmail.class})
+    @Email(message = "Please provide a valid email", groups = { UpdateEmailForm.class, RegistrationForm.class })
+    @NotBlank(message = "Email is required", groups = { UpdateEmailForm.class, RegistrationForm.class })
     private String email;
 
-    @Size(max = 16, message = "Maximum 16 characters", groups = {UpdatePassword.class})
-    @Size(min = 6, message = "Minimum 6 characters", groups = {UpdatePassword.class})
-    @Pattern(regexp = "^[\\S]*$", message = "Password must not contain whitespaces", groups = {UpdatePassword.class})
+    @Size(max = 16, message = "Maximum 16 characters", groups = { UpdatePasswordForm.class, RegistrationForm.class })
+    @Size(min = 6, message = "Minimum 6 characters", groups = { UpdatePasswordForm.class, RegistrationForm.class })
+    @Pattern(regexp = "^[\\S]*$", message = "Password must not contain whitespaces", groups = {
+            UpdatePasswordForm.class, RegistrationForm.class })
     private String password;
 
     private String currentEmail;
-    
+
     public String getCurrentEmail() {
         return currentEmail;
     }
