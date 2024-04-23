@@ -66,7 +66,7 @@ public class AuthenticationController {
 
     @GetMapping("/settings")
     public String showSettingsPage(Model model) {
-        Optional<String> username = getCurrentUsername();
+        Optional<String> username = accountService.getCurrentUsername();
         AccountDTO dto = new AccountDTO();
         dto.setCurrentEmail(accountService.getEmailByUsername(username.get()));
         model.addAttribute("user", dto);
@@ -75,7 +75,7 @@ public class AuthenticationController {
     
     @PostMapping("/updateEmail")
     public String updateEmail(@ModelAttribute("user") @Validated({UpdateEmailForm.class}) AccountDTO accountDto, BindingResult result, RedirectAttributes redirectAttributes) {
-        Optional<String> username = getCurrentUsername();
+        Optional<String> username = accountService.getCurrentUsername();
         if (result.hasErrors()) {
             accountDto.setCurrentEmail(accountService.getEmailByUsername(username.get()));
             return "settings";
@@ -96,7 +96,7 @@ public class AuthenticationController {
 
     @PostMapping("/updatePassword")
     public String updatePassword(@ModelAttribute("user") @Validated({UpdatePasswordForm.class}) AccountDTO accountDto, BindingResult result, RedirectAttributes redirectAttributes) {
-        Optional<String> username = getCurrentUsername();
+        Optional<String> username = accountService.getCurrentUsername();
         if (result.hasErrors()) {
             accountDto.setCurrentEmail(accountService.getEmailByUsername(username.get()));
             return "settings";
@@ -108,16 +108,8 @@ public class AuthenticationController {
 
     @PostMapping("/deleteAccount")
     public String deleteAccount(){
-        Optional<String> username = getCurrentUsername();
+        Optional<String> username = accountService.getCurrentUsername();
         accountService.deleteAccount(username.get());
         return "redirect:/login";
-    }
-
-    private Optional<String> getCurrentUsername(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            return Optional.empty();
-        }
-        return Optional.of(authentication.getName());
     }
 }
