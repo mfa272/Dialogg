@@ -4,6 +4,8 @@ import com.mfa272.dialogg.dto.PostDTO;
 import com.mfa272.dialogg.services.AccountService;
 import com.mfa272.dialogg.services.PostService;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,41 +33,29 @@ public class SocialController {
 
     @PostMapping("/follow/{username}")
     public String followAccount(@PathVariable String username) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            return "redirect:/login";
-        }
-        String currentUsername = authentication.getName();
-        accountService.follow(currentUsername, username);
+        Optional<String> currentUsername = accountService.getCurrentUsername();
+        accountService.follow(currentUsername.get(), username);
         return "redirect:/" + username;
     }
 
     @PostMapping("/unfollow/{username}")
     public String unfollowAccount(@PathVariable String username) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            return "redirect:/login";
-        }
-        String currentUsername = authentication.getName();
-        accountService.unfollow(currentUsername, username);
+        Optional<String> currentUsername = accountService.getCurrentUsername();
+        accountService.unfollow(currentUsername.get(), username);
         return "redirect:/" + username;
     }
 
     @PostMapping("/new")
     public String createPost(@ModelAttribute("newPost") @Valid PostDTO postDTO, BindingResult result,
             RedirectAttributes redirectAttributes) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            return "redirect:/login";
-        }
-        String currentUsername = authentication.getName();
+        Optional<String> currentUsername = accountService.getCurrentUsername();
         if (!result.hasErrors()) {
-            postService.createPost(postDTO, currentUsername);
+            postService.createPost(postDTO, currentUsername.get());
         } else {
             redirectAttributes
                     .addFlashAttribute("content", result.getFieldError("content")
                             .getDefaultMessage());
         }
-        return "redirect:/" + currentUsername;
+        return "redirect:/" + currentUsername.get();
     }
 }
