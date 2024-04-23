@@ -38,6 +38,12 @@ public class AuthenticationController {
         return "login";
     }
     
+    @GetMapping("/failedLogin")
+    public String showFailedLoginPage(Model model) {
+        model.addAttribute("errorMessage", "Wrong credentials");
+        return "login";
+    }
+
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         model.addAttribute("user", new AccountDTO());

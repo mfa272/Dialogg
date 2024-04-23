@@ -30,7 +30,7 @@ public class WebSecurityConfig {
                 (requests) -> requests.anyRequest().permitAll())
                 .formLogin((form) -> form.loginPage("/login")
                         .defaultSuccessUrl("/", true)
-                        .failureUrl("/login").permitAll())
+                        .failureUrl("/failedLogin").permitAll())
                 .logout((logout) -> logout.permitAll());
         return http.build();
     }
