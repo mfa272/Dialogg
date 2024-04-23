@@ -90,11 +90,11 @@ public class AccountService {
     }
 
     public boolean isFollowing(String followerUsername, String followedUsername) {
-        Account follower = userRepository.findByUsername(followerUsername).orElse(null);
-        Account followed = userRepository.findByUsername(followedUsername).orElse(null);
+        Optional<Account> follower = userRepository.findByUsername(followerUsername);
+        Optional<Account> followed = userRepository.findByUsername(followedUsername);
 
-        if (follower != null && followed != null) {
-            return follower.getFollowing().contains(followed);
+        if (follower.isPresent() && followed.isPresent()) {
+            return follower.get().getFollowing().contains(followed.get());
         }
         return false;
     }
