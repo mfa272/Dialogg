@@ -23,15 +23,21 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    //TODO: add login error
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(
-                (requests) -> requests.anyRequest().permitAll())
-                .formLogin((form) -> form.loginPage("/login")
-                        .defaultSuccessUrl("/", true)
-                        .failureUrl("/failedLogin").permitAll())
-                .logout((logout) -> logout.permitAll());
+        http
+            .authorizeHttpRequests((authz) -> authz
+                .requestMatchers("/settings").authenticated().requestMatchers("/{username}", "/login", "/failedLogin", "/register").permitAll()
+                .anyRequest().authenticated()
+            )
+            .formLogin((form) -> form
+                .loginPage("/login")
+                .defaultSuccessUrl("/", true)
+                .failureUrl("/failedLogin")
+                .permitAll())
+            .logout((logout) -> logout
+                .logoutSuccessUrl("/login")
+                .permitAll());
         return http.build();
     }
 
