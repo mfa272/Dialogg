@@ -87,4 +87,20 @@ public class FollowTests {
             assert (content.contains("<div>username" + i + "</div>"));
         }
     }
+
+    @Test
+    void userCantFollowSelf() throws Exception {
+        mockMvc.perform(post("/follow/username1")
+                .with(user("username1"))
+                .with(csrf()));
+
+        MvcResult result = mockMvc.perform(get("/username1/followed")
+                .param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("followed"))
+                .andReturn();
+
+        String content = result.getResponse().getContentAsString();
+        assert (!content.contains("<a href=\"/username1\">"));
+    }
 }

@@ -63,12 +63,12 @@ public class AccountService {
 
     @Transactional
     public boolean follow(String follower_username, String followed_username) {
-        Account follower = userRepository.findByUsername(follower_username).orElse(null);
-        Account followed = userRepository.findByUsername(followed_username).orElse(null);
+        Optional<Account> follower = userRepository.findByUsername(follower_username);
+        Optional<Account> followed = userRepository.findByUsername(followed_username);
 
-        if (follower != null && followed != null && follower_username != followed_username) {
-            follower.addFollowing(followed);
-            followed.addFollower(follower);
+        if (follower.isPresent() && followed.isPresent() && !follower_username.equals(followed_username)) {
+            follower.get().addFollowing(followed.get());
+            followed.get().addFollower(follower.get());
             return true;
         }
 
@@ -77,12 +77,12 @@ public class AccountService {
 
     @Transactional
     public boolean unfollow(String follower_username, String followed_username) {
-        Account follower = userRepository.findByUsername(follower_username).orElse(null);
-        Account followed = userRepository.findByUsername(followed_username).orElse(null);
+        Optional<Account> follower = userRepository.findByUsername(follower_username);
+        Optional<Account> followed = userRepository.findByUsername(followed_username);
 
-        if (follower != null && followed != null && follower_username != followed_username) {
-            follower.removeFollowing(followed);
-            followed.removeFollower(follower);
+        if (follower.isPresent() && followed.isPresent() && !follower_username.equals(followed_username)) {
+            follower.get().removeFollowing(followed.get());
+            followed.get().removeFollower(follower.get());
             return true;
         }
 
