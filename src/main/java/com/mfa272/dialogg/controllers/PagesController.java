@@ -52,7 +52,7 @@ public class PagesController {
             }
             return "profile";
         }
-        return "/";
+        return "redirect:/";
     }
 
     @GetMapping("/{username}/followers")
