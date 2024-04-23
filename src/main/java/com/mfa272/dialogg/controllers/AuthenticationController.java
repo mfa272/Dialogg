@@ -112,11 +112,11 @@ public class AuthenticationController {
         return "redirect:/settings";
     }
 
-    //ADD message
     @PostMapping("/deleteAccount")
-    public String deleteAccount(){
+    public String deleteAccount(RedirectAttributes redirectAttributes){
         Optional<String> username = accountService.getCurrentUsername();
         accountService.deleteAccount(username.get());
+        redirectAttributes.addFlashAttribute("successMessage", "Account deleted succesfully!");
         return "redirect:/login";
     }
 }
