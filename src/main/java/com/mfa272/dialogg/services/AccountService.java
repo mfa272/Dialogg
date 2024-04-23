@@ -16,10 +16,11 @@ import java.util.Optional;
 @Service
 public class AccountService {
 
-    public enum RegistrationResult {
+    public enum OperationResult {
         SUCCESS,
         USERNAME_TAKEN,
-        EMAIL_TAKEN
+        EMAIL_TAKEN,
+        FAILURE
     }
 
     private final AccountRepository userRepository;
@@ -31,16 +32,16 @@ public class AccountService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public RegistrationResult registerUser(AccountDTO userDTO) {
+    public OperationResult registerUser(AccountDTO userDTO) {
         Optional<Account> userByEmail = userRepository.findByEmail(userDTO.getEmail());
         Optional<Account> userByUsername = userRepository.findByUsername(userDTO.getUsername());
 
         if (userByEmail.isPresent()) {
-            return RegistrationResult.EMAIL_TAKEN;
+            return OperationResult.EMAIL_TAKEN;
         }
 
         if (userByUsername.isPresent()) {
-            return RegistrationResult.USERNAME_TAKEN;
+            return OperationResult.USERNAME_TAKEN;
         }
 
         Account user = new Account();
@@ -50,7 +51,7 @@ public class AccountService {
 
         userRepository.save(user);
 
-        return RegistrationResult.SUCCESS;
+        return OperationResult.SUCCESS;
     }
 
     public boolean UserExists(String username) {
@@ -95,7 +96,7 @@ public class AccountService {
         return false;
     }
 
-    public Page<AccountDTO> getFollowers(String username, int page, int size){
+    public Page<AccountDTO> getFollowers(String username, int page, int size) {
         Page<Account> followers = userRepository.findFollowersByUsername(username, PageRequest.of(page, size));
         return followers.map(f -> {
             AccountDTO dto = new AccountDTO();
@@ -104,7 +105,7 @@ public class AccountService {
         });
     }
 
-    public Page<AccountDTO> getFollowing(String username, int page, int size){
+    public Page<AccountDTO> getFollowing(String username, int page, int size) {
         Page<Account> followers = userRepository.findFollowingByUsername(username, PageRequest.of(page, size));
         return followers.map(f -> {
             AccountDTO dto = new AccountDTO();
@@ -113,11 +114,60 @@ public class AccountService {
         });
     }
 
-    public long countFollowers(String username){
+    public long countFollowers(String username) {
         return userRepository.countFollowersByUsername(username);
     }
 
-    public long countFollowing(String username){
+    public long countFollowing(String username) {
         return userRepository.countFollowingByUsername(username);
+    }
+
+    public OperationResult updateEmail(String username, String newEmail) {
+        Optional<Account> account = userRepository.findByUsername(username);
+        if(userRepository.findByEmail(newEmail).isPresent()){
+            return OperationResult.EMAIL_TAKEN;
+        }
+        if (account.isPresent()) {
+            Account a = account.get();
+            a.setEmail(newEmail);
+            userRepository.save(a);
+            return OperationResult.SUCCESS;
+        }
+        return OperationResult.FAILURE;
+    }
+
+    public OperationResult updatePassword(String username, String newPassword) {
+        Optional<Account> account = userRepository.findByUsername(username);
+        if (account.isPresent()) {
+            Account a = account.get();
+            a.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(a);
+            return OperationResult.SUCCESS;
+        }
+        return OperationResult.FAILURE;
+    }
+
+    @Transactional
+    public OperationResult deleteAccount(String username) {
+        int following = (int) countFollowing(username);
+        if (following > 0) {
+            for (AccountDTO u : getFollowing(username, 0, following)) {
+                unfollow(username, u.getUsername());
+            }
+        }
+        int followers = (int) countFollowing(username);
+        if (followers > 0) {
+            for (AccountDTO u : getFollowers(username, 0, followers)) {
+                unfollow(u.getUsername(), username);
+            }
+        }
+        userRepository.deleteByUsername(username);
+        return OperationResult.SUCCESS;
+    }
+
+    public String getEmailByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found for username: " + username))
+                .getEmail();
     }
 }

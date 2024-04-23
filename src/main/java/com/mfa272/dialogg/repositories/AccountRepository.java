@@ -16,6 +16,8 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
 
     Optional<Account> findByUsername(String username);
 
+    void deleteByUsername(String username);
+
     @Query("SELECT f FROM Account a JOIN a.followers f WHERE a.username = :username")
     Page<Account> findFollowersByUsername(@Param("username") String username, Pageable page);
 

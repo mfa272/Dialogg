@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Account Settings</title>
+</head>
+
+<body>
+    Account Settings
+    <div th:if="${successMessage}" th:text="${successMessage}"/>
+    <form th:action="@{/updateEmail}" th:object="${user}" method="post">
+        <div th:text="'Current Email: ' + *{currentEmail}" />
+        New Email:
+        <input th:field="*{email}">
+        <button>Update Email</button>
+        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+    </form>
+    <br>
+    <form th:action="@{/updatePassword}" th:object="${user}" method="post">
+        New Password:
+        <input type="password" th:field="*{password}">
+        <button>Update Password</button>
+        <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+    </form>
+    <br>
+    <form th:action="@{/deleteAccount}" method="post">
+        <button>Delete Account</button>
+    </form>
+</body>
+
+</html>

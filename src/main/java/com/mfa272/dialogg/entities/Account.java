@@ -42,7 +42,7 @@ public class Account {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany()
     @JoinTable(
         name = "account_followers",
         joinColumns = @JoinColumn(name = "followed_id"),

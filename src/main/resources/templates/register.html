@@ -6,23 +6,22 @@
 </head>
 
 <body>
-    <div class="main-container">
-        dialogg
-        <form th:action="@{/register}" th:object="${user}" method="post">
-            Username
-            <input type="text" id="username" th:field="*{username}">
-            <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" />
-            <br>
-            Email
-            <input type="email" id="email" th:field="*{email}">
-            <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" />
-            <br>
-            Password
-            <input type="password" id="password" th:field="*{password}">
-            <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" />
-            <br>
-            <button>Register</button>
-        </form>
+    dialogg
+    <form th:action="@{/register}" th:object="${user}" method="post">
+        Username
+        <input type="text" id="username" th:field="*{username}">
+        <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" />
+        <br>
+        Email
+        <input type="email" id="email" th:field="*{email}">
+        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" />
+        <br>
+        Password
+        <input type="password" id="password" th:field="*{password}">
+        <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" />
+        <br>
+        <button>Register</button>
+    </form>
 </body>
 
 </html>

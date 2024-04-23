@@ -7,20 +7,39 @@ import jakarta.validation.constraints.Size;
 
 public class AccountDTO {
 
-    @Size(max = 16, message = "Maximum 16 characters")
-    @Size(min = 6, message = "Minimum 6 characters")
-    @NotBlank(message = "Username is required")
-    @Pattern(regexp = "^[\\S]*$", message = "Username must not contain whitespaces")
+    public interface Registration {
+    }
+
+    public interface UpdateEmail {
+    }
+
+    public interface UpdatePassword {
+    }
+
+    @Size(max = 16, message = "Maximum 16 characters", groups = {Registration.class})
+    @Size(min = 6, message = "Minimum 6 characters", groups = {Registration.class})
+    @NotBlank(message = "Username is required", groups = {Registration.class})
+    @Pattern(regexp = "^[\\S]*$", message = "Username must not contain whitespaces", groups = {Registration.class})
     private String username;
 
-    @Email(message = "Please provide a valid email")
-    @NotBlank(message = "Email is required")
+    @Email(message = "Please provide a valid email", groups = {UpdateEmail.class})
+    @NotBlank(message = "Email is required", groups = {UpdateEmail.class})
     private String email;
 
-    @Size(max = 16, message = "Maximum 16 characters")
-    @Size(min = 6, message = "Minimum 6 characters")
-    @Pattern(regexp = "^[\\S]*$", message = "Password must not contain whitespaces")
+    @Size(max = 16, message = "Maximum 16 characters", groups = {UpdatePassword.class})
+    @Size(min = 6, message = "Minimum 6 characters", groups = {UpdatePassword.class})
+    @Pattern(regexp = "^[\\S]*$", message = "Password must not contain whitespaces", groups = {UpdatePassword.class})
     private String password;
+
+    private String currentEmail;
+    
+    public String getCurrentEmail() {
+        return currentEmail;
+    }
+
+    public void setCurrentEmail(String currentEmail) {
+        this.currentEmail = currentEmail;
+    }
 
     public String getUsername() {
         return username;
