@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Thread</title>
+</head>
+
+<body>
+    Post
+
+    <div th:replace="fragments.html :: post (${post})"></div>
+
+    Replies
+    <div th:each="r : ${replies}">
+        <div th:text="${r.username}"></div>
+        <div th:text="${r.createdAt}"></div>
+        <div th:text="${r.content}"></div>
+        <form th:action="@{/reply(postId=${post.id}, replyId=${r.id})}" th:object="${newReply}" method="post">
+            <input th:field="*{content}" placeholder="Write a reply..." />
+            <button type="submit">Submit</button>
+        </form>
+        <a th:if="${r.repliesCount > 0}" th:href="@{/thread/{postId}(postId=${post.id}, replyId=${r.id})}">
+            <div th:text="'Replies: ' + ${r.repliesCount}"></div>
+        </a>
+        <div th:if="${replyId == r.id}">
+            <div th:each="subReply : ${repliesToReply}">
+                <div th:text="${subReply.username}"></div>
+                <div th:text="${subReply.createdAt}"></div>
+                <div th:text="${subReply.content}"></div>
+            </div>
+
+            <div th:if="${repliesToReply.hasNext()}">
+                <a th:href="@{/thread/{postId}(postId=${post.id}, replyId=${r.id}, 
+                    page=${replies.number}, 
+                    subPage=${repliesToReply.number + 1})}">Load
+                    More</a>
+            </div>
+            <div th:if="${repliesToReply.number > 0}">
+                <a th:href="@{/thread/{postId}(postId=${post.id}, replyId=${r.id}, 
+                    page=${replies.number}, 
+                    subPage=${repliesToReply.number -1})}">Back</a>
+                <br>
+            </div>
+        </div>
+    </div>
+    <div th:if="${replies.hasNext()}">
+        <a th:href="@{/thread/{postId}(postId=${post.id}, page=${replies.number + 1})}">Load
+            More</a>
+    </div>
+    <div th:if="${replies.number > 0}">
+        <a th:href="@{/thread/{postId}(postId=${post.id}, page=${replies.number - 1})}">Back</a>
+        <br>
+    </div>
+    </div>
+
+</body>
+
+</html>

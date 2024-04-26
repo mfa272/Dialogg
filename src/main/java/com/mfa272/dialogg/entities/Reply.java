@@ -30,17 +30,38 @@ public class Reply {
     private Account account;
 
     @ManyToOne
-    @JoinColumn(name = "post_id", nullable = false)
-    private Post post;
+    @JoinColumn(name = "post_id")
+    private Post parentPost;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Reply parentReply;
 
     public Reply() {
     }
 
-    public Reply(String content, Account account, Post post) {
+    public Reply(String content, Account account, Post parentPost) {
         this.content = content;
         this.account = account;
-        this.post = post;
+        this.parentPost = parentPost;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public Reply(String content, Account account, Post parentPost, Reply parentReply) {
+        this(content, account, parentPost);
+        this.parentReply = parentReply;
+    }
+
+    public Reply getParentReply() {
+        return parentReply;
+    }
+
+    public void setParentReply(Reply parentReply) {
+        this.parentReply = parentReply;
+    }
+
+    public boolean hasParentReply() {
+        return getParentReply() != null;
     }
 
     public Long getId() {
@@ -75,13 +96,11 @@ public class Reply {
         this.account = account;
     }
 
-    public Post getPost() {
-        return post;
+    public Post getParentPost() {
+        return parentPost;
     }
 
-    public void setPost(Post post) {
-        this.post = post;
+    public void setParentPost(Post post) {
+        this.parentPost = post;
     }
-
-    
 }

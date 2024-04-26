@@ -34,7 +34,6 @@ public class UserSettingsTests {
 
     @BeforeAll
     static void setup(@Autowired MockMvc mockMvc) throws Exception {
-        // Register and login user to initialize session
         mockMvc.perform(post("/register")
                 .param("username", username)
                 .param("email", username + "@example.com")

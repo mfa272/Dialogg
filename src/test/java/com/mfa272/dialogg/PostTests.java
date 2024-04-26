@@ -97,4 +97,42 @@ public class PostTests {
                         assert (content.contains("<div>" + String.valueOf(i) + "</div>"));
                 }
         }
+
+        @Test
+        void replyTest() throws Exception {
+                mockMvc.perform(post("/reply")
+                                .session(session)
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("content", "test reply")
+                                .param("postId", "1")
+                                .with(csrf()))
+                                .andExpect(status().is3xxRedirection())
+                                .andExpect(view().name("redirect:/thread/1"));
+
+                MvcResult threadResult = mockMvc.perform(get("/thread/1")
+                                .with(csrf()))
+                                .andExpect(status().isOk())
+                                .andReturn();
+
+                String thread = threadResult.getResponse().getContentAsString();
+                assert (thread.contains("test reply"));
+
+                mockMvc.perform(post("/reply")
+                                .session(session)
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("content", "test reply to reply")
+                                .param("postId", "1")
+                                .param("replyId", "1")
+                                .with(csrf()))
+                                .andExpect(status().is3xxRedirection())
+                                .andExpect(view().name("redirect:/thread/1?replyId=1"));
+
+                threadResult = mockMvc.perform(get("/thread/1?replyId=1")
+                                .with(csrf()))
+                                .andExpect(status().isOk())
+                                .andReturn();
+
+                thread = threadResult.getResponse().getContentAsString();
+                assert (thread.contains("test reply to reply"));
+        }
 }

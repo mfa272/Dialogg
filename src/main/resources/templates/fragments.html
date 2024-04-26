@@ -11,6 +11,18 @@
             <button>Submit</button>
         </form>
     </div>
+    <div th:fragment="post (p)">
+        <div th:text="${p.username}"></div>
+        <div th:text="${p.createdAt}"></div>
+        <div th:text="${p.content}"></div>
+        <form th:action="@{/reply(postId=${p.id})}" th:object="${newReply}" method="post">
+            <input th:field="*{content}" placeholder="Write a reply..." />
+            <button type="submit">Submit</button>
+        </form>
+        <a th:if="${p.repliesCount} > 0"th:href="@{/thread/{id}(id=${p.id})}">
+                <div th:text="'Replies: ' + ${p.repliesCount}"></div>
+        </a>
+    </div>
 </body>
 
 </html>

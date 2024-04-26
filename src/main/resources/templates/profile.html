@@ -21,9 +21,8 @@
         </div>
     </div>
     Posts
-    <div th:each="post : ${posts}">
-        <div th:text="${post.content}"></div>
-        <div th:text="${post.createdAt}"></div>
+    <div th:each="p : ${posts}">
+        <div th:replace="fragments.html :: post (${p})"></div>
     </div>
     <div th:if="${posts.hasNext()}">
         <a th:href="@{/{username}(username=${username}, page=${posts.number + 1})}">Load More</a>

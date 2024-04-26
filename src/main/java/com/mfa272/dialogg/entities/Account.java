@@ -53,15 +53,15 @@ public class Account {
     @ManyToMany(mappedBy = "followers")
     private Set<Account> following = new HashSet<>();
 
-    public Account() {
-        this.createdAt = LocalDateTime.now();
-    }
+        public Account() {
+            this.createdAt = LocalDateTime.now();
+        }
 
-    public Account(String username, String email, String password) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-    }
+        public Account(String username, String email, String password) {
+            this.username = username;
+            this.email = email;
+            this.password = password;
+        }
 
     public Long getId() {
         return id;
