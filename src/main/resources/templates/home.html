@@ -1,0 +1,6 @@
+<div th:each="p : ${posts}">
+    <div th:replace="~{fragments.html :: post (${p})}"></div>
+</div>
+<div th:if="${posts.hasNext()}">
+    <a th:href="@{/(next=true)}">Show older</a>
+</div>

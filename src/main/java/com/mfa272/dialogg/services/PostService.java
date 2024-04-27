@@ -16,6 +16,8 @@ import com.mfa272.dialogg.repositories.AccountRepository;
 import com.mfa272.dialogg.entities.Reply;
 import com.mfa272.dialogg.repositories.ReplyRepository;
 
+import java.time.LocalDateTime;
+
 @Service
 public class PostService {
     private final PostRepository postRepository;
@@ -30,16 +32,40 @@ public class PostService {
         this.replyRepository = replyRepository;
     }
 
+    public Page<PostDTO> getFollowedPostsBeforeDate(String username, LocalDateTime date, int page, int size) {
+        Page<Post> posts = postRepository.findPostsByFollowedAccountsBeforeDate(username, date,
+                PageRequest.of(page, size));
+        return posts.map(p -> convertToPostDTO(p));
+    }
+
+    public Page<PostDTO> getNotFollowedPostsBeforeDate(String username, LocalDateTime date, int page, int size) {
+        Page<Post> posts = postRepository.findPostsByNotFollowedAccountsBeforeDate(username, date,
+                PageRequest.of(page, size));
+        return posts.map(p -> convertToPostDTO(p));
+    }
+
+    public Page<PostDTO> getPostsBeforeDate(LocalDateTime date, int size) {
+        Page<Post> posts = postRepository.findByCreatedAtBeforeOrderByCreatedAtDesc(date, PageRequest.of(0, size));
+        return posts.map(p -> convertToPostDTO(p));
+    }
+
+    public Page<PostDTO> getFollowedPosts(String username, int page, int size) {
+        Page<Post> posts = postRepository.findPostsByFollowedAccounts(username, PageRequest.of(page, size));
+        return posts.map(p -> convertToPostDTO(p));
+    }
+
+    public Page<PostDTO> getNotFollowedPosts(String username, int page, int size) {
+        Page<Post> posts = postRepository.findPostsByNotFollowedAccounts(username, PageRequest.of(page, size));
+        return posts.map(p -> convertToPostDTO(p));
+    }
+
+    public Page<PostDTO> getPosts(int page, int size) {
+        Page<Post> posts = postRepository.findByOrderByCreatedAtDesc(PageRequest.of(page, size));
+        return posts.map(p -> convertToPostDTO(p));
+    }
+
     public Optional<PostDTO> getPostById(Long postId) {
-        return postRepository.findById(postId).map(p -> {
-            PostDTO dto = new PostDTO();
-            dto.setId(p.getId());
-            dto.setContent(p.getContent());
-            dto.setCreatedAt(p.getCreatedAt());
-            dto.setUsername(p.getAccount().getUsername());
-            dto.setRepliesCount(replyRepository.countRepliesByPost(p));
-            return dto;
-        });
+        return postRepository.findById(postId).map(p -> convertToPostDTO(p));
     }
 
     public boolean createPost(PostDTO postDTO, String username) {
@@ -51,16 +77,7 @@ public class PostService {
     public Page<PostDTO> getPostsByUser(String username, int page, int size) {
         Page<Post> posts = postRepository.findByAccountUsernameOrderByCreatedAtDesc(username,
                 PageRequest.of(page, size));
-        return posts.map(p -> {
-            PostDTO dto = new PostDTO();
-            dto.setId(p.getId());
-            dto.setContent(p.getContent());
-            dto.setCreatedAt(p.getCreatedAt());
-            dto.setUsername(p.getAccount().getUsername());
-            dto.setRepliesCount(replyRepository.countRepliesByPost(p));
-            dto.setReplies(null);
-            return dto;
-        });
+        return posts.map(p -> convertToPostDTO(p));
     }
 
     public Page<ReplyDTO> getRepliesByPost(Long postId, int page, int size) {
@@ -127,5 +144,15 @@ public class PostService {
         Reply reply = new Reply(replyDTO.getContent(), account.get(), post.get(), toReplyGot);
         replyRepository.save(reply);
         return true;
+    }
+    
+    private PostDTO convertToPostDTO(Post post) {
+        PostDTO dto = new PostDTO();
+        dto.setId(post.getId());
+        dto.setContent(post.getContent());
+        dto.setCreatedAt(post.getCreatedAt());
+        dto.setUsername(post.getAccount().getUsername());
+        dto.setRepliesCount(replyRepository.countRepliesByPost(post));
+        return dto;
     }
 }

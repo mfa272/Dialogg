@@ -1,13 +1,20 @@
 package com.mfa272.dialogg.controllers;
 
 import com.mfa272.dialogg.dto.AccountDTO;
+import com.mfa272.dialogg.dto.FeedResponse;
 import com.mfa272.dialogg.dto.PostDTO;
 import com.mfa272.dialogg.dto.ReplyDTO;
+import com.mfa272.dialogg.entities.Post;
 import com.mfa272.dialogg.services.AccountService;
 import com.mfa272.dialogg.services.PostService;
 
-import java.util.Optional;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
+import java.util.Optional;
+import java.time.LocalDateTime;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -32,7 +39,36 @@ public class PagesController {
     }
 
     @GetMapping("/")
-    public String showHome(Model model) {
+    public String showHome(Model model,
+            @RequestParam(required = false) boolean next,
+            HttpSession session, HttpServletResponse response) {
+
+        LocalDateTime sessionFollowedDate = null;
+        LocalDateTime sessionNotFollowedDate = null;
+        if (next) {
+            sessionFollowedDate = (LocalDateTime) session.getAttribute("feedFollowedDate");
+            sessionNotFollowedDate = (LocalDateTime) session.getAttribute("feedOtherDate");
+        }
+        Optional<String> username = accountService.getCurrentUsername();
+        if (username.isPresent()) {
+            FeedResponse fr = accountService.getUserFeed(username.get(), sessionFollowedDate, sessionNotFollowedDate);
+            model.addAttribute("posts", fr.getPosts());
+            session.setAttribute("feedFollowedDate", fr.getLastFollowedDate());
+            session.setAttribute("feedOtherDate", fr.getLastOtherDate());
+        } else {
+            Page<PostDTO> posts;
+            if (sessionNotFollowedDate != null) {
+                posts = postService.getPostsBeforeDate(sessionNotFollowedDate, 10);
+            } else {
+                posts = postService.getPosts(0, 10);
+            }
+            if (!posts.isEmpty()) {
+                PostDTO lastPost = posts.getContent().get(posts.getContent().size() - 1);
+                session.setAttribute("feedOtherDate", lastPost.getCreatedAt());
+            }
+            model.addAttribute("posts", posts);
+        }
+        model.addAttribute("newReply", new ReplyDTO());
         return "home";
     }
 
@@ -86,11 +122,11 @@ public class PagesController {
     }
 
     @GetMapping("/thread/{postId}")
-    public String getThread(@PathVariable Long postId, 
-                            @RequestParam(required = false) Long replyId, 
-                            @RequestParam(defaultValue = "0") int page, 
-                            @RequestParam(defaultValue = "0") int subPage, 
-                            Model model) {
+    public String getThread(@PathVariable Long postId,
+            @RequestParam(required = false) Long replyId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "0") int subPage,
+            Model model) {
         Optional<PostDTO> post = postService.getPostById(postId);
         Page<ReplyDTO> replies = postService.getRepliesByPost(postId, page, 10);
         model.addAttribute("post", post.get());

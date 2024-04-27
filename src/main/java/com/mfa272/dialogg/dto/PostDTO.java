@@ -47,8 +47,8 @@ public class PostDTO {
         this.id = id;
     }
 
-    public String getCreatedAt() {
-        return createdAt.toString();
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
