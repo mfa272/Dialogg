@@ -4,7 +4,6 @@ import com.mfa272.dialogg.dto.AccountDTO;
 import com.mfa272.dialogg.dto.FeedResponse;
 import com.mfa272.dialogg.dto.PostDTO;
 import com.mfa272.dialogg.dto.ReplyDTO;
-import com.mfa272.dialogg.entities.Post;
 import com.mfa272.dialogg.services.AccountService;
 import com.mfa272.dialogg.services.PostService;
 
@@ -14,7 +13,6 @@ import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import java.time.LocalDateTime;
 
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
