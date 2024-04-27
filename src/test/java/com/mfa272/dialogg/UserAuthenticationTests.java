@@ -1,12 +1,16 @@
 package com.mfa272.dialogg;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+
+import jakarta.servlet.http.HttpSession;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -102,6 +106,24 @@ class UserAuthenticationTests {
 				.with(csrf()))
 				.andExpect(status().is3xxRedirection())
 				.andExpect(redirectedUrl("/posts/new"));
+	}
 
+	@Test
+	public void logout() throws Exception {
+
+		MockHttpSession session = (MockHttpSession) mockMvc.perform(post("/login")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.param("username", "testtest")
+				.param("password", "password")
+				.with(csrf()))
+				.andReturn()
+				.getRequest()
+				.getSession(false);
+
+		mockMvc.perform(post("/logout")
+				.session(session)
+				.with(csrf()))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrl("/"));
 	}
 }
