@@ -215,14 +215,15 @@ public class AccountService {
         while (mergedPosts.size() < 10 && (!followedContent.isEmpty() || !notFollowedContent.isEmpty())) {
             for (int i = 0; i < 3 && !followedContent.isEmpty() && mergedPosts.size() < 10; i++) {
                 PostDTO post = followedContent.remove(0);
-                post.setContent("FOLLOWING: " + post.getContent());
                 mergedPosts.add(post);
                 lastFollowedDate = post.getCreatedAt();
             }
             for (int i = 0; i < 3 && !notFollowedContent.isEmpty() && mergedPosts.size() < 10; i++) {
                 PostDTO post = notFollowedContent.remove(0);
-                mergedPosts.add(post);
-                lastOtherDate = post.getCreatedAt();
+                if (!post.getUsername().equals(username)) {
+                    mergedPosts.add(post);
+                    lastOtherDate = post.getCreatedAt();
+                }
             }
         }
 
