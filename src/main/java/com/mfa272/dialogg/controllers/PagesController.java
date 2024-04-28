@@ -3,7 +3,6 @@ package com.mfa272.dialogg.controllers;
 import com.mfa272.dialogg.dto.AccountDTO;
 import com.mfa272.dialogg.dto.FeedResponse;
 import com.mfa272.dialogg.dto.PostDTO;
-import com.mfa272.dialogg.dto.ReplyDTO;
 import com.mfa272.dialogg.services.AccountService;
 import com.mfa272.dialogg.services.PostService;
 
@@ -66,7 +65,7 @@ public class PagesController {
             }
             model.addAttribute("posts", posts);
         }
-        model.addAttribute("newReply", new ReplyDTO());
+        model.addAttribute("newReply", new PostDTO());
         return "home";
     }
 
@@ -74,7 +73,7 @@ public class PagesController {
     public String userProfile(@PathVariable String username, Model model, @RequestParam(defaultValue = "0") int page) {
         if (accountService.UserExists(username)) {
             Page<PostDTO> posts = postService.getPostsByUser(username, page, 10);
-            model.addAttribute("newReply", new ReplyDTO());
+            model.addAttribute("newReply", new PostDTO());
             model.addAttribute("username", username);
             model.addAttribute("newPost", new PostDTO());
             model.addAttribute("posts", posts);
@@ -126,13 +125,13 @@ public class PagesController {
             @RequestParam(defaultValue = "0") int subPage,
             Model model) {
         Optional<PostDTO> post = postService.getPostById(postId);
-        Page<ReplyDTO> replies = postService.getRepliesByPost(postId, page, 10);
+        Page<PostDTO> replies = postService.getRepliesByPost(postId, page, 10);
         model.addAttribute("post", post.get());
-        model.addAttribute("newReply", new ReplyDTO());
+        model.addAttribute("newReply", new PostDTO());
         model.addAttribute("replies", replies);
 
         if (replyId != null) {
-            Page<ReplyDTO> repliesToReply = postService.getRepliesByReply(replyId, subPage, 10);
+            Page<PostDTO> repliesToReply = postService.getRepliesByReply(replyId, subPage, 10);
             model.addAttribute("repliesToReply", repliesToReply);
             model.addAttribute("replyId", replyId);
         }

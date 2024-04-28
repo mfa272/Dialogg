@@ -13,7 +13,7 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
     
     Page<Reply> findByParentPostAndParentReplyIsNullOrderByCreatedAtDesc(Post post, Pageable pageable);
 
-    Page<Reply> findByParentReplyOrderByCreatedAtDesc(Reply reply, Pageable pageable);
+    Page<Reply> findByParentReply_IdOrderByCreatedAtDesc(Long parentReplyId, Pageable pageable);
 
     @Query("SELECT COUNT(r) FROM Reply r WHERE r.parentPost = :post")
     Long countRepliesByPost(@Param("post") Post post);

@@ -12,6 +12,10 @@
         </form>
     </div>
     <div th:fragment="post (p)">
+        <div th:if="${p.username == #authentication.name}">
+            <form th:action="@{/delete/{postId}(postId=${p.id})}" method="post">
+            <button >Delete</button>
+        </form></div>
         <div th:text="${p.username}"></div>
         <div th:text="${p.createdAt}"></div>
         <div th:text="${p.content}"></div>

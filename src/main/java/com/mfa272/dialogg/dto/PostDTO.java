@@ -19,9 +19,19 @@ public class PostDTO {
 
     private Long id;
 
-    private Page<ReplyDTO> replies;
+    private Page<PostDTO> replies;
 
     private Long repliesCount;
+
+    private Long threadId;
+    
+    public Long getThreadId() {
+        return threadId;
+    }
+
+    public void setThreadId(Long threadId) {
+        this.threadId = threadId;
+    }
 
     public Long getRepliesCount() {
         return repliesCount;
@@ -31,11 +41,11 @@ public class PostDTO {
         this.repliesCount = repliesCount;
     }
 
-    public Page<ReplyDTO> getReplies() {
+    public Page<PostDTO> getReplies() {
         return replies;
     }
 
-    public void setReplies(Page<ReplyDTO> replies) {
+    public void setReplies(Page<PostDTO> replies) {
         this.replies = replies;
     }
 

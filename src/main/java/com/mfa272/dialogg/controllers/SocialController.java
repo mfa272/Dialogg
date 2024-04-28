@@ -1,7 +1,6 @@
 package com.mfa272.dialogg.controllers;
 
 import com.mfa272.dialogg.dto.PostDTO;
-import com.mfa272.dialogg.dto.ReplyDTO;
 import com.mfa272.dialogg.services.AccountService;
 import com.mfa272.dialogg.services.PostService;
 
@@ -13,6 +12,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -58,8 +58,26 @@ public class SocialController {
         return "redirect:/" + currentUsername.get();
     }
 
+    @PostMapping("/delete/{postId}")
+    public String deletePost(@PathVariable Long postId, @RequestParam(required = false) Long replyId,
+            RedirectAttributes redirectAttributes,
+            @RequestHeader(value = "Referer", required = false) String referer) {
+        boolean deleted;
+        if (replyId == null) {
+            deleted = postService.deletePost(postId);
+        } else {
+            deleted = postService.deleteReply(replyId);
+        }
+        if (deleted) {
+            redirectAttributes.addFlashAttribute("message", "Deleted");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Error");
+        }
+        return "redirect:" + (referer != null ? referer : "/");
+    }
+
     @PostMapping("/reply")
-    public String postReply(@ModelAttribute("newReply") ReplyDTO replyDTO, @RequestParam Long postId,
+    public String postReply(@ModelAttribute("newReply") PostDTO replyDTO, @RequestParam Long postId,
             @RequestParam(required = false) Long replyId) {
         String username = accountService.getCurrentUsername().get();
         boolean success;

@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -134,5 +135,83 @@ public class PostTests {
 
                 thread = threadResult.getResponse().getContentAsString();
                 assert (thread.contains("test reply to reply"));
+        }
+
+        @Test
+        public void deletePost() throws Exception {
+
+                MockHttpSession session = (MockHttpSession) mockMvc.perform(post("/login")
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("username", username)
+                                .param("password", password)
+                                .with(csrf()))
+                                .andReturn()
+                                .getRequest()
+                                .getSession(false);
+
+                String postContent = "deletion test";
+                mockMvc.perform(post("/new")
+                                .with(user("username"))
+                                .session(session)
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("content", postContent)
+                                .with(csrf()));
+
+                MvcResult result = mockMvc.perform(get("/")
+                                .session(session))
+                                .andExpect(status().isOk())
+                                .andReturn();
+
+                String content = result.getResponse().getContentAsString();
+                assert (content.contains(postContent));
+
+                mockMvc.perform(post("/delete/21")
+                                .session(session)
+                                .with(csrf()))
+                                .andExpect(status().is3xxRedirection())
+                                .andExpect(view().name("redirect:/"));
+
+                result = mockMvc.perform(get("/")
+                                .session(session))
+                                .andExpect(status().isOk())
+                                .andReturn();
+
+                content = result.getResponse().getContentAsString();
+                assert (!content.contains(postContent));
+        }
+
+        @Test
+        public void deleteReply() throws Exception {
+                MockHttpSession session = (MockHttpSession) mockMvc.perform(post("/login")
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("username", username)
+                                .param("password", password)
+                                .with(csrf()))
+                                .andReturn()
+                                .getRequest()
+                                .getSession(false);
+
+                mockMvc.perform(post("/reply")
+                                .session(session)
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("content", "reply for deletion test")
+                                .param("postId", "1")
+                                .with(csrf()));
+
+                mockMvc.perform(post("/delete/1")
+                                .param("replyId", "1")
+                                .session(session)
+                                .with(csrf()))
+                                .andExpect(status().is3xxRedirection())
+                                .andExpect(view().name("redirect:/"));
+
+                MvcResult result = mockMvc.perform(get("/thread/1")
+                                .session(session)
+                                .with(csrf()))
+                                .andExpect(status().isOk())
+                                .andReturn();
+
+                String content = result.getResponse().getContentAsString();
+                assert (!content.contains("reply for deletion test"));
         }
 }

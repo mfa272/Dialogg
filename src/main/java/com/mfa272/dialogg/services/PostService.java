@@ -5,10 +5,11 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.mfa272.dialogg.dto.PostDTO;
-import com.mfa272.dialogg.dto.ReplyDTO;
 import com.mfa272.dialogg.entities.Account;
 import com.mfa272.dialogg.entities.Post;
 import com.mfa272.dialogg.repositories.PostRepository;
@@ -80,19 +81,20 @@ public class PostService {
         return posts.map(p -> convertToPostDTO(p));
     }
 
-    public Page<ReplyDTO> getRepliesByPost(Long postId, int page, int size) {
+    public Page<PostDTO> getRepliesByPost(Long postId, int page, int size) {
         Optional<Post> postOptional = postRepository.findById(postId);
         if (postOptional.isPresent()) {
             Post post = postOptional.get();
             Page<Reply> replies = replyRepository.findByParentPostAndParentReplyIsNullOrderByCreatedAtDesc(
                     post, PageRequest.of(page, size));
             return replies.map(r -> {
-                ReplyDTO rdto = new ReplyDTO();
+                PostDTO rdto = new PostDTO();
                 rdto.setId(r.getId());
                 rdto.setContent(r.getContent());
                 rdto.setCreatedAt(r.getCreatedAt());
                 rdto.setUsername(r.getAccount().getUsername());
                 rdto.setRepliesCount(replyRepository.countRepliesByReply(r));
+                rdto.setThreadId(postId);
                 return rdto;
             });
         } else {
@@ -100,33 +102,34 @@ public class PostService {
         }
     }
 
-    public Page<ReplyDTO> getRepliesByReply(Long replyId, int page, int size) {
-        Page<Reply> replies = replyRepository.findByParentReplyOrderByCreatedAtDesc(
-                replyRepository.findById(replyId).get(), PageRequest.of(page, size));
+    public Page<PostDTO> getRepliesByReply(Long replyId, int page, int size) {
+        Page<Reply> replies = replyRepository.findByParentReply_IdOrderByCreatedAtDesc(
+                replyId, PageRequest.of(page, size));
         return replies.map(r -> {
-            ReplyDTO rdto = new ReplyDTO();
+            PostDTO rdto = new PostDTO();
             rdto.setId(r.getId());
             rdto.setContent(r.getContent());
             rdto.setCreatedAt(r.getCreatedAt());
             rdto.setUsername(r.getAccount().getUsername());
             rdto.setRepliesCount(replyRepository.countRepliesByReply(r));
+            rdto.setThreadId(r.getParentPost().getId());
             return rdto;
         });
     }
 
-    public boolean replyToPost(ReplyDTO replyDTO, String username, Long postId) {
+    public boolean replyToPost(PostDTO PostDTO, String username, Long postId) {
         Optional<Post> post = postRepository.findById(postId);
         Optional<Account> account = userRepository.findByUsername(username);
 
         if (post.isPresent() && account.isPresent()) {
-            Reply reply = new Reply(replyDTO.getContent(), account.get(), post.get());
+            Reply reply = new Reply(PostDTO.getContent(), account.get(), post.get());
             replyRepository.save(reply);
             return true;
         }
         return false;
     }
 
-    public boolean replyToReply(ReplyDTO replyDTO, String username, Long postId, Long replyId) {
+    public boolean replyToReply(PostDTO PostDTO, String username, Long postId, Long replyId) {
         Optional<Post> post = postRepository.findById(postId);
         Optional<Reply> toReply = replyRepository.findById(replyId);
         Optional<Account> account = userRepository.findByUsername(username);
@@ -141,11 +144,11 @@ public class PostService {
             return false;
         }
 
-        Reply reply = new Reply(replyDTO.getContent(), account.get(), post.get(), toReplyGot);
+        Reply reply = new Reply(PostDTO.getContent(), account.get(), post.get(), toReplyGot);
         replyRepository.save(reply);
         return true;
     }
-    
+
     private PostDTO convertToPostDTO(Post post) {
         PostDTO dto = new PostDTO();
         dto.setId(post.getId());
@@ -154,5 +157,31 @@ public class PostService {
         dto.setUsername(post.getAccount().getUsername());
         dto.setRepliesCount(replyRepository.countRepliesByPost(post));
         return dto;
+    }
+
+    @Transactional
+    public boolean deletePost(Long postId) {
+        Optional<Post> post = postRepository.findById(postId);
+        if (post.isPresent()) {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            if (post.get().getAccount().getUsername().equals(currentUsername)) {
+                postRepository.delete(post.get());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Transactional
+    public boolean deleteReply(Long replyId) {
+        Optional<Reply> reply = replyRepository.findById(replyId);
+        if (reply.isPresent()) {
+            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            if (reply.get().getAccount().getUsername().equals(currentUsername)) {
+                replyRepository.delete(reply.get());
+                return true;
+            }
+        }
+        return false;
     }
 }

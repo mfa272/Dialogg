@@ -12,6 +12,11 @@
 
     Replies
     <div th:each="r : ${replies}">
+        <div th:if="${r.username == #authentication.name}">
+            <form th:action="@{/delete/{postId}(postId=${r.threadId}, replyId=${r.id})}" method="post">
+                <button>Delete</button>
+            </form>
+        </div>
         <div th:text="${r.username}"></div>
         <div th:text="${r.createdAt}"></div>
         <div th:text="${r.content}"></div>
@@ -24,6 +29,10 @@
         </a>
         <div th:if="${replyId == r.id}">
             <div th:each="subReply : ${repliesToReply}">
+                <div th:if="${subReply.username == #authentication.name}">
+                    <form th:action="@{/delete/{postId}(postId=${subReply.threadId}, replyId=${subReply.id})}" method="post">
+                        <button>Delete</button>
+                    </form>
                 <div th:text="${subReply.username}"></div>
                 <div th:text="${subReply.createdAt}"></div>
                 <div th:text="${subReply.content}"></div>
