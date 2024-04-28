@@ -43,25 +43,22 @@ public class Account {
     private List<Post> posts = new ArrayList<>();
 
     @ManyToMany()
-    @JoinTable(
-        name = "account_followers",
-        joinColumns = @JoinColumn(name = "followed_id"),
-        inverseJoinColumns = @JoinColumn(name = "follower_id")
-    )
+    @JoinTable(name = "account_followers", joinColumns = @JoinColumn(name = "followed_id"), inverseJoinColumns = @JoinColumn(name = "follower_id"))
     private Set<Account> followers = new HashSet<>();
 
     @ManyToMany(mappedBy = "followers")
     private Set<Account> following = new HashSet<>();
 
-        public Account() {
-            this.createdAt = LocalDateTime.now();
-        }
+    public Account() {
+        this.createdAt = LocalDateTime.now();
+    }
 
-        public Account(String username, String email, String password) {
-            this.username = username;
-            this.email = email;
-            this.password = password;
-        }
+    public Account(String username, String email, String password, LocalDateTime createdAt) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.createdAt = LocalDateTime.now();
+    }
 
     public Long getId() {
         return id;
