@@ -6,12 +6,9 @@ import com.mfa272.dialogg.repositories.AccountRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mfa272.dialogg.dto.AccountDTO;
-import com.mfa272.dialogg.dto.FeedResponse;
-import com.mfa272.dialogg.dto.PostDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,8 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.ArrayList;
-import java.time.LocalDateTime;
 
 @Service
 public class AccountService {
@@ -35,13 +30,11 @@ public class AccountService {
 
     private final AccountRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final PostService postService;
 
     @Autowired
     public AccountService(AccountRepository userRepository, PasswordEncoder passwordEncoder, PostService postService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.postService = postService;
     }
 
     public OperationResult registerUser(AccountDTO userDTO) {
@@ -189,51 +182,5 @@ public class AccountService {
             return Optional.empty();
         }
         return Optional.of(authentication.getName());
-    }
-
-    public FeedResponse getUserFeed(String username, LocalDateTime lastFollowedDate, LocalDateTime lastOtherDate) {
-        Page<PostDTO> followedPosts;
-        Page<PostDTO> otherPosts;
-        ArrayList<PostDTO> mergedPosts = new ArrayList<>();
-        Page<PostDTO> posts;
-
-        if (lastFollowedDate == null) {
-            followedPosts = postService.getFollowedPosts(username, 0, 10);
-        } else {
-            followedPosts = postService.getFollowedPostsBeforeDate(username, lastFollowedDate, 0, 10);
-        }
-
-        if (lastOtherDate == null) {
-            otherPosts = postService.getNotFollowedPosts(username, 0, 10);
-        } else {
-            otherPosts = postService.getNotFollowedPostsBeforeDate(username, lastOtherDate, 0, 10);
-        }
-
-        ArrayList<PostDTO> followedContent = new ArrayList<>(followedPosts.getContent());
-        ArrayList<PostDTO> notFollowedContent = new ArrayList<>(otherPosts.getContent());
-
-        while (mergedPosts.size() < 10 && (!followedContent.isEmpty() || !notFollowedContent.isEmpty())) {
-            for (int i = 0; i < 3 && !followedContent.isEmpty() && mergedPosts.size() < 10; i++) {
-                PostDTO post = followedContent.remove(0);
-                mergedPosts.add(post);
-                lastFollowedDate = post.getCreatedAt();
-            }
-            for (int i = 0; i < 3 && !notFollowedContent.isEmpty() && mergedPosts.size() < 10; i++) {
-                PostDTO post = notFollowedContent.remove(0);
-                if (!post.getUsername().equals(username)) {
-                    mergedPosts.add(post);
-                    lastOtherDate = post.getCreatedAt();
-                }
-            }
-        }
-
-        boolean hasNext = followedPosts.getNumberOfElements() + otherPosts.getNumberOfElements() > 10
-                || otherPosts.hasNext() || followedPosts.hasNext();
-
-        int size = Math.max(mergedPosts.size(), 1);
-        mergedPosts.sort((post1, post2) -> post2.getCreatedAt().compareTo(post1.getCreatedAt()));
-        posts = new PageImpl<>(mergedPosts, PageRequest.of(0, size),
-                hasNext ? 11 : mergedPosts.size());
-        return new FeedResponse(posts, lastFollowedDate, lastOtherDate);
     }
 }
