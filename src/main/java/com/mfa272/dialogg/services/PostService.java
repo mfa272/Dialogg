@@ -205,8 +205,8 @@ public class PostService {
 
         if (!(post.isPresent()) || !(account.isPresent())) {
             return false;
-        } 
-        if (post.get().getAccount().getUsername().equals(username)){
+        }
+        if (post.get().getAccount().getUsername().equals(username)) {
             return false;
         }
         Post p = post.get();
@@ -222,8 +222,8 @@ public class PostService {
 
         if (!(post.isPresent()) || !(account.isPresent())) {
             return false;
-        } 
-        if (post.get().getAccount().getUsername().equals(username)){
+        }
+        if (post.get().getAccount().getUsername().equals(username)) {
             return false;
         }
         Post p = post.get();
@@ -239,8 +239,8 @@ public class PostService {
 
         if (!(reply.isPresent()) || !(account.isPresent())) {
             return false;
-        } 
-        if (reply.get().getAccount().getUsername().equals(username)){
+        }
+        if (reply.get().getAccount().getUsername().equals(username)) {
             return false;
         }
         Reply p = reply.get();
@@ -256,8 +256,8 @@ public class PostService {
 
         if (!(reply.isPresent()) || !(account.isPresent())) {
             return false;
-        } 
-        if (reply.get().getAccount().getUsername().equals(username)){
+        }
+        if (reply.get().getAccount().getUsername().equals(username)) {
             return false;
         }
         Reply p = reply.get();
@@ -265,7 +265,7 @@ public class PostService {
         return true;
     }
 
-       public FeedResponse getUserFeed(String username, LocalDateTime lastFollowedDate, LocalDateTime lastOtherDate) {
+    public FeedResponse getUserFeed(String username, LocalDateTime lastFollowedDate, LocalDateTime lastOtherDate) {
         Page<PostDTO> followedPosts;
         Page<PostDTO> otherPosts;
         ArrayList<PostDTO> mergedPosts = new ArrayList<>();

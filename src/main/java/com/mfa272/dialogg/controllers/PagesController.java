@@ -48,7 +48,7 @@ public class PagesController {
         }
         Optional<String> username = accountService.getCurrentUsername();
         if (username.isPresent()) {
-            FeedResponse fr = accountService.getUserFeed(username.get(), sessionFollowedDate, sessionNotFollowedDate);
+            FeedResponse fr = postService.getUserFeed(username.get(), sessionFollowedDate, sessionNotFollowedDate);
             model.addAttribute("posts", fr.getPosts());
             session.setAttribute("feedFollowedDate", fr.getLastFollowedDate());
             session.setAttribute("feedOtherDate", fr.getLastOtherDate());
