@@ -25,10 +25,30 @@ public class PostDTO {
 
     private Long threadId;
     
+    private Long likesCount;
+
+    private boolean isLiked;
+
     public Long getThreadId() {
         return threadId;
     }
 
+    public Long getLikesCount() {
+        return likesCount;
+    }
+
+    public void setLikesCount(Long likesCount) {
+        this.likesCount = likesCount;
+    }
+
+    public boolean isLiked() {
+        return isLiked;
+    }
+
+    public void setLiked(boolean isLiked) {
+        this.isLiked = isLiked;
+    }
+    
     public void setThreadId(Long threadId) {
         this.threadId = threadId;
     }

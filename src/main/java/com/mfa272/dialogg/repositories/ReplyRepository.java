@@ -20,4 +20,10 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
 
     @Query("SELECT COUNT(r) FROM Reply r WHERE r.parentReply = :reply")
     Long countRepliesByReply(@Param("reply") Reply reply);
+
+    @Query("SELECT COUNT(a) FROM Reply r JOIN r.likedByAccounts a WHERE r.id = :id")
+    Long countLikesByReply_Id(@Param("id") Long id);
+
+    @Query("SELECT COUNT(r) > 0 FROM Reply r JOIN r.likedByAccounts a WHERE r.id = :id AND a.username = :username")
+    boolean isReplyLikedByUser(@Param("id") Long id, @Param("username") String username);
 }

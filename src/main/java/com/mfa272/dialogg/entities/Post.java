@@ -3,7 +3,9 @@ package com.mfa272.dialogg.entities;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "posts")
@@ -26,6 +28,14 @@ public class Post {
     @OneToMany(mappedBy = "parentPost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reply> replies = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+        name = "posts_likes",
+        joinColumns = @JoinColumn(name = "post_id"),
+        inverseJoinColumns = @JoinColumn(name = "account_id")
+    )
+    private Set<Account> likedByAccounts = new HashSet<>();
+
     public Post() {
     }
 
@@ -33,6 +43,19 @@ public class Post {
         this.content = content;
         this.account = account;
         this.createdAt = LocalDateTime.now();
+    }
+
+    
+    public void likePost(Account account) {
+        likedByAccounts.add(account);
+    }
+
+    public void unlikePost(Account account) {
+        likedByAccounts.remove(account);
+    }
+
+    public Set<Account> getLikedByAccounts() {
+        return likedByAccounts;
     }
 
     public Long getId() {

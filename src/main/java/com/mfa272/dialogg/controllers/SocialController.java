@@ -95,4 +95,28 @@ public class SocialController {
         }
         return "redirect:/";
     }
+
+    @PostMapping("/like")
+    public String like(@RequestParam(required = false) Long postId, @RequestParam(required = false) Long replyId,
+            RedirectAttributes redirectAttributes,
+            @RequestHeader(value = "Referer", required = false) String referer) {
+        if (replyId == null) {
+            postService.likePost(postId);
+        } else if (postId == null) {
+            postService.likeReply(replyId);
+        }
+        return "redirect:" + (referer != null ? referer : "/");
+    }
+
+    @PostMapping("/unlike")
+    public String unlike(@RequestParam(required = false) Long postId, @RequestParam(required = false) Long replyId,
+            RedirectAttributes redirectAttributes,
+            @RequestHeader(value = "Referer", required = false) String referer) {
+        if (replyId == null) {
+            postService.unlikePost(postId);
+        } else if (postId == null) {
+            postService.unlikeReply(replyId);
+        }
+        return "redirect:" + (referer != null ? referer : "/");
+    }
 }

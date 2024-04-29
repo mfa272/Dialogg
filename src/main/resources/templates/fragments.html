@@ -14,17 +14,27 @@
     <div th:fragment="post (p)">
         <div th:if="${p.username == #authentication.name}">
             <form th:action="@{/delete/{postId}(postId=${p.id})}" method="post">
-            <button >Delete</button>
-        </form></div>
+                <button>Delete</button>
+            </form>
+        </div>
         <div th:text="${p.username}"></div>
         <div th:text="${p.createdAt}"></div>
         <div th:text="${p.content}"></div>
+        <div th:text="'Likes: ' + ${p.likesCount}"></div>
+        <div th:if="${p.username != #authentication.name}" sec:authorize="isAuthenticated()">
+            <div th:if="${!p.isLiked}">
+                <form th:action="@{/like(postId=${p.id})}" method="post"><button>Like</form>
+            </div>
+            <div th:if="${p.isLiked}">
+                <form th:action="@{/unlike(postId=${p.id})}" method="post"><button>Unlike</button></form>
+            </div>
+        </div>
         <form th:action="@{/reply(postId=${p.id})}" th:object="${newReply}" method="post">
             <input th:field="*{content}" placeholder="Write a reply..." />
             <button type="submit">Submit</button>
         </form>
-        <a th:if="${p.repliesCount} > 0"th:href="@{/thread/{id}(id=${p.id})}">
-                <div th:text="'Replies: ' + ${p.repliesCount}"></div>
+        <a th:if="${p.repliesCount} > 0" th:href="@{/thread/{id}(id=${p.id})}">
+            <div th:text="'Replies: ' + ${p.repliesCount}"></div>
         </a>
     </div>
 </body>

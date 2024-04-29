@@ -22,14 +22,14 @@ import java.time.LocalDateTime;
 @Service
 public class PostService {
     private final PostRepository postRepository;
-    private final AccountRepository userRepository;
+    private final AccountRepository accountRepository;
     private final ReplyRepository replyRepository;
 
     @Autowired
     public PostService(PostRepository postRepository, AccountRepository userRepository,
             ReplyRepository replyRepository) {
         this.postRepository = postRepository;
-        this.userRepository = userRepository;
+        this.accountRepository = userRepository;
         this.replyRepository = replyRepository;
     }
 
@@ -70,7 +70,7 @@ public class PostService {
     }
 
     public boolean createPost(PostDTO postDTO, String username) {
-        Post post = new Post(postDTO.getContent(), userRepository.findByUsername(username).get());
+        Post post = new Post(postDTO.getContent(), accountRepository.findByUsername(username).get());
         postRepository.save(post);
         return true;
     }
@@ -95,6 +95,9 @@ public class PostService {
                 rdto.setUsername(r.getAccount().getUsername());
                 rdto.setRepliesCount(replyRepository.countRepliesByReply(r));
                 rdto.setThreadId(postId);
+                rdto.setLikesCount(replyRepository.countLikesByReply_Id(r.getId()));
+                rdto.setLiked(replyRepository.isReplyLikedByUser(r.getId(),
+                        SecurityContextHolder.getContext().getAuthentication().getName()));
                 return rdto;
             });
         } else {
@@ -113,13 +116,16 @@ public class PostService {
             rdto.setUsername(r.getAccount().getUsername());
             rdto.setRepliesCount(replyRepository.countRepliesByReply(r));
             rdto.setThreadId(r.getParentPost().getId());
+            rdto.setLikesCount(replyRepository.countLikesByReply_Id(r.getId()));
+            rdto.setLiked(replyRepository.isReplyLikedByUser(r.getId(),
+                    SecurityContextHolder.getContext().getAuthentication().getName()));
             return rdto;
         });
     }
 
     public boolean replyToPost(PostDTO PostDTO, String username, Long postId) {
         Optional<Post> post = postRepository.findById(postId);
-        Optional<Account> account = userRepository.findByUsername(username);
+        Optional<Account> account = accountRepository.findByUsername(username);
 
         if (post.isPresent() && account.isPresent()) {
             Reply reply = new Reply(PostDTO.getContent(), account.get(), post.get());
@@ -132,7 +138,7 @@ public class PostService {
     public boolean replyToReply(PostDTO PostDTO, String username, Long postId, Long replyId) {
         Optional<Post> post = postRepository.findById(postId);
         Optional<Reply> toReply = replyRepository.findById(replyId);
-        Optional<Account> account = userRepository.findByUsername(username);
+        Optional<Account> account = accountRepository.findByUsername(username);
 
         if (!(post.isPresent() || toReply.isPresent() || account.isPresent())) {
             return false;
@@ -156,6 +162,9 @@ public class PostService {
         dto.setCreatedAt(post.getCreatedAt());
         dto.setUsername(post.getAccount().getUsername());
         dto.setRepliesCount(replyRepository.countRepliesByPost(post));
+        dto.setLikesCount(postRepository.countLikesByPost_Id(post.getId()));
+        dto.setLiked(postRepository.isPostLikedByUser(post.getId(),
+                SecurityContextHolder.getContext().getAuthentication().getName()));
         return dto;
     }
 
@@ -183,5 +192,73 @@ public class PostService {
             }
         }
         return false;
+    }
+
+    @Transactional
+    public boolean likePost(Long postId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Post> post = postRepository.findById(postId);
+        Optional<Account> account = accountRepository.findByUsername(username);
+
+        if (!(post.isPresent()) || !(account.isPresent())) {
+            return false;
+        } 
+        if (post.get().getAccount().getUsername().equals(username)){
+            return false;
+        }
+        Post p = post.get();
+        p.likePost(account.get());
+        return true;
+    }
+
+    @Transactional
+    public boolean unlikePost(Long postId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Post> post = postRepository.findById(postId);
+        Optional<Account> account = accountRepository.findByUsername(username);
+
+        if (!(post.isPresent()) || !(account.isPresent())) {
+            return false;
+        } 
+        if (post.get().getAccount().getUsername().equals(username)){
+            return false;
+        }
+        Post p = post.get();
+        p.unlikePost(account.get());
+        return true;
+    }
+
+    @Transactional
+    public boolean likeReply(Long replyId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Reply> reply = replyRepository.findById(replyId);
+        Optional<Account> account = accountRepository.findByUsername(username);
+
+        if (!(reply.isPresent()) || !(account.isPresent())) {
+            return false;
+        } 
+        if (reply.get().getAccount().getUsername().equals(username)){
+            return false;
+        }
+        Reply p = reply.get();
+        p.likeReply(account.get());
+        return true;
+    }
+
+    @Transactional
+    public boolean unlikeReply(Long replyId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Reply> reply = replyRepository.findById(replyId);
+        Optional<Account> account = accountRepository.findByUsername(username);
+
+        if (!(reply.isPresent()) || !(account.isPresent())) {
+            return false;
+        } 
+        if (reply.get().getAccount().getUsername().equals(username)){
+            return false;
+        }
+        Reply p = reply.get();
+        p.unlikeReply(account.get());
+        return true;
     }
 }

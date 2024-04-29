@@ -49,6 +49,12 @@ public class Account {
     @ManyToMany(mappedBy = "followers")
     private Set<Account> following = new HashSet<>();
 
+    @ManyToMany(mappedBy = "likedByAccounts")
+    private Set<Post> likedPosts = new HashSet<>();
+
+    @ManyToMany(mappedBy = "likedByAccounts")
+    private Set<Reply> likedReplies = new HashSet<>();
+
     public Account() {
         this.createdAt = LocalDateTime.now();
     }
@@ -58,6 +64,34 @@ public class Account {
         this.email = email;
         this.password = password;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void likePost(Post post) {
+        likedPosts.add(post);
+        post.getLikedByAccounts().add(this);
+    }
+
+    public void unlikePost(Post post) {
+        likedPosts.remove(post);
+        post.getLikedByAccounts().remove(this);
+    }
+
+    public void likeReply(Reply reply) {
+        likedReplies.add(reply);
+        reply.getLikedByAccounts().add(this);
+    }
+
+    public void unlikeReply(Reply reply) {
+        likedReplies.remove(reply);
+        reply.getLikedByAccounts().remove(this);
+    }
+
+    public Set<Post> getLikedPosts() {
+        return likedPosts;
+    }
+
+    public Set<Reply> getLikedReplies() {
+        return likedReplies;
     }
 
     public Long getId() {

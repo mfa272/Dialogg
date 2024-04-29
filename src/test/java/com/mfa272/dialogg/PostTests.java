@@ -27,6 +27,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
                 "spring.datasource.password=sa",
                 "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect"
 })
+
 public class PostTests {
         @Autowired
         private MockMvc mockMvc;
@@ -213,5 +214,121 @@ public class PostTests {
 
                 String content = result.getResponse().getContentAsString();
                 assert (!content.contains("reply for deletion test"));
+        }
+
+        @Test
+        public void likeTest() throws Exception {
+                mockMvc.perform(post("/reply")
+                                .session(session)
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("content", "reply for like test")
+                                .param("postId", "1")
+                                .with(csrf()));
+
+                mockMvc.perform(post("/reply")
+                                .session(session)
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("content", "subreply for like test")
+                                .param("postId", "1")
+                                .param("replyId", "1")
+                                .with(csrf()));
+
+                mockMvc.perform(post("/register")
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("username", "username2")
+                                .param("email", "username2@email.com")
+                                .param("password", "password2")
+                                .with(csrf()));
+
+                mockMvc.perform(post("/register")
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("username", "username3")
+                                .param("email", "username3@email.com")
+                                .param("password", "password3")
+                                .with(csrf()));
+                                
+                MvcResult loginResult = mockMvc.perform(post("/login")
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("username", "username2")
+                                .param("password", "password2")
+                                .with(csrf()))
+                                .andReturn();
+
+                MockHttpSession session2 = (MockHttpSession) loginResult.getRequest().getSession(false);
+
+                mockMvc.perform(post("/like")
+                                .session(session2)
+                                .param("postId", "1")
+                                .with(csrf()));
+
+                mockMvc.perform(post("/like")
+                                .session(session2)
+                                .param("replyId", "1")
+                                .with(csrf()));
+
+                mockMvc.perform(post("/like")
+                                .session(session2)
+                                .param("replyId", "2")
+                                .with(csrf()));
+
+                loginResult = mockMvc.perform(post("/login")
+                                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                                .param("username", "username3")
+                                .param("password", "password3")
+                                .with(csrf()))
+                                .andReturn();
+
+                session2 = (MockHttpSession) loginResult.getRequest().getSession(false);
+
+                mockMvc.perform(post("/like")
+                                .session(session2)
+                                .param("postId", "1")
+                                .with(csrf()))
+                                .andExpect(status().is3xxRedirection());
+
+                mockMvc.perform(post("/like")
+                                .session(session2)
+                                .param("replyId", "1")
+                                .with(csrf()))
+                                .andExpect(status().is3xxRedirection());
+
+                mockMvc.perform(post("/like")
+                                .session(session2)
+                                .param("replyId", "2")
+                                .with(csrf()))
+                                .andExpect(status().is3xxRedirection());
+                MvcResult result = mockMvc.perform(get("/thread/1?replyId=1")
+                                .session(session2)
+                                .with(csrf()))
+                                .andExpect(status().isOk())
+                                .andReturn();
+
+                String content = result.getResponse().getContentAsString();
+
+                String findStr = "Likes: 2";
+                int lastIndex = 0;
+                int count = 0;
+                while (lastIndex != -1) {
+                        lastIndex = content.indexOf(findStr, lastIndex);
+                        if (lastIndex != -1) {
+                                count++;
+                                lastIndex += findStr.length();
+                        }
+                }
+
+                assert (count == 3);
+
+                findStr = "Unlike";
+                lastIndex = 0;
+                count = 0;
+                while (lastIndex != -1) {
+                        lastIndex = content.indexOf(findStr, lastIndex);
+                        if (lastIndex != -1) {
+                                count++;
+                                lastIndex += findStr.length();
+                        }
+                }
+
+                assert (count == 3);
         }
 }
