@@ -17,7 +17,7 @@ public class AccountDTO {
     }
 
     @Size(max = 16, message = "Maximum 16 characters", groups = { RegistrationForm.class })
-    @Size(min = 6, message = "Minimum 6 characters", groups = { RegistrationForm.class })
+    @Size(min = 4, message = "Minimum 6 characters", groups = { RegistrationForm.class })
     @NotBlank(message = "Username is required", groups = { RegistrationForm.class })
     @Pattern(regexp = "^[a-zA-Z0-9._]+$", message = "Username contains unallowed characters", groups = {
             RegistrationForm.class })
