@@ -34,7 +34,7 @@ public class SocialController {
     public String followAccount(@PathVariable String username) {
         Optional<String> currentUsername = accountService.getCurrentUsername();
         accountService.follow(currentUsername.get(), username);
-        return "redirect:/" + username;
+        return "redirect:/" + username + "/profile";
     }
 
     @PostMapping("/unfollow/{username}")

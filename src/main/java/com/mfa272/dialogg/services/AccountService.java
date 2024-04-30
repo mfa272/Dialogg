@@ -92,13 +92,7 @@ public class AccountService {
     }
 
     public boolean isFollowing(String followerUsername, String followedUsername) {
-        Optional<Account> follower = userRepository.findByUsername(followerUsername);
-        Optional<Account> followed = userRepository.findByUsername(followedUsername);
-
-        if (follower.isPresent() && followed.isPresent()) {
-            return follower.get().getFollowing().contains(followed.get());
-        }
-        return false;
+        return userRepository.isUserFollowingUser2(followerUsername, followedUsername);
     }
 
     public Page<AccountDTO> getFollowers(String username, int page, int size) {

@@ -29,4 +29,7 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
 
     @Query("SELECT COUNT(*) FROM Account a JOIN a.following f WHERE a.username = :username")    
     Long countFollowingByUsername(@Param("username") String username);
+
+    @Query("SELECT COUNT(a) > 0 FROM Account a JOIN a.following f WHERE a.username = :username AND f.username = :username2")
+    boolean isUserFollowingUser2(@Param("username") String username, @Param("username2") String username2);
 }
