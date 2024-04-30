@@ -69,7 +69,7 @@ public class PagesController {
         return "home";
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("/{username}/profile")
     public String userProfile(@PathVariable String username, Model model, @RequestParam(defaultValue = "0") int page) {
         if (accountService.UserExists(username)) {
             Page<PostDTO> posts = postService.getPostsByUser(username, page, 10);

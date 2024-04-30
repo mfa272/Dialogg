@@ -41,7 +41,7 @@ public class SocialController {
     public String unfollowAccount(@PathVariable String username) {
         Optional<String> currentUsername = accountService.getCurrentUsername();
         accountService.unfollow(currentUsername.get(), username);
-        return "redirect:/" + username;
+        return "redirect:/" + username + "/profile";
     }
 
     @PostMapping("/new")
@@ -55,7 +55,7 @@ public class SocialController {
                     .addFlashAttribute("content", result.getFieldError("content")
                             .getDefaultMessage());
         }
-        return "redirect:/" + currentUsername.get();
+        return "redirect:/" + currentUsername.get() + "/profile";
     }
 
     @PostMapping("/delete/{postId}")
