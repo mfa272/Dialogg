@@ -1,42 +1,71 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<body>
-    <div th:fragment="submitPost">
-        <form th:action="@{/new}" th:object="${newPost}" method="post">
-            <div th:text="${newPost.content}"></div>
-            Post content
-            <input type="text" id="content" th:field="*{content}">
-            <div th:if="${content}" th:text="${content}" />
-            <button>Submit</button>
+<div th:fragment="topbar" class="topbar">
+    <a th:href="@{/}">dialogg</a>
+    <div>
+        <form sec:authorize="isAnonymous()" th:action="@{/login}" method="get" style="display: inline-block;">
+            <button class="topbar-button">Login</button>
+        </form>
+        <a sec:authorize="isAnonymous()" th:href="@{/register}">
+            <button class="topbar-button">Sign up</button>
+        </a>
+        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" style="display: inline-block;">
+            <button class="topbar-button">Logout</button>
         </form>
     </div>
-    <div th:fragment="post (p)">
+</div>
+
+<div th:fragment="left-column" class="column-left">
+    <div sec:authorize="isAuthenticated()"><a th:href="@{/settings}"><button class="button"
+                style="margin-bottom: 10px">Account settings</button></a><br>
+    </div>
+    <a style="font-family: 'Arial', sans-serif;
+        font-size: 18px; font-weight: bold; text-decoration: none; color:black;" sec:authorize="isAuthenticated()"
+        th:href="@{/{username}/profile(username=${#authentication.name})}" th:text="${#authentication.name}" />
+    <form th:action="@{/new}" th:object="${newPost}" method="post">
+        <textarea th:field="*{content}" style="resize: none; margin-bottom: 10px" rows="4"
+            placeholder="Enter something..."></textarea><br>
+        <button class="button">New post</button><br>
+    </form>
+    <div class="error" th:if="${postError}" th:text="${postError}"></div><br>
+</div>
+
+<div th:fragment="post (p)" class="post">
+    <div style="display: flex; justify-content: start; gap: 20px; align-items: baseline;">
+        <a th:href="@{/{username}/profile(username=${p.username})}"
+            style="text-decoration: none; color: black; font-weight: bold;" th:text="'@' + ${p.username}" />
+
+        <div style="color: grey;" th:text="${p.timePassed}" />
         <div th:if="${p.username == #authentication.name}">
             <form th:action="@{/delete/{postId}(postId=${p.id})}" method="post">
-                <button>Delete</button>
+                <button class="button">Delete</button>
             </form>
         </div>
-        <div th:text="${p.username}"></div>
-        <div th:text="${p.createdAt}"></div>
-        <div th:text="${p.content}"></div>
-        <div th:text="'Likes: ' + ${p.likesCount}"></div>
-        <div th:if="${p.username != #authentication.name}" sec:authorize="isAuthenticated()">
-            <div th:if="${!p.isLiked}">
-                <form th:action="@{/like(postId=${p.id})}" method="post"><button>Like</form>
-            </div>
-            <div th:if="${p.isLiked}">
-                <form th:action="@{/unlike(postId=${p.id})}" method="post"><button>Unlike</button></form>
-            </div>
+    </div>
+    <div th:text="${p.content}"></div>
+    <div style="display: flex; justify-content: start; gap: 20px;">
+        <div th:if="${!p.isLiked}">
+            <form th:action="@{/like(postId=${p.id})}" method="post">
+                <button class="button" th:text="'Likes: ' + ${p.likesCount}"></button>
+            </form>
         </div>
-        <form th:action="@{/reply(postId=${p.id})}" th:object="${newReply}" method="post">
-            <input th:field="*{content}" placeholder="Write a reply..." />
-            <button type="submit">Submit</button>
-        </form>
-        <a th:if="${p.repliesCount} > 0" th:href="@{/thread/{id}(id=${p.id})}">
-            <div th:text="'Replies: ' + ${p.repliesCount}"></div>
+        <div th:if="${p.isLiked}">
+            <form th:action="@{/unlike(postId=${p.id})}" method="post">
+                <button class="like-button" th:text="'Likes: ' + ${p.likesCount}"></button>
+            </form>
+        </div>
+        <a th:if="${p.repliesCount > 0}" th:href="@{/thread/{postId}(postId=${p.id})}">
+            <button class="button" th:text="'Replies: ' + ${p.repliesCount}"></button>
+        </a>
+        <a th:if="${p.repliesCount <= 0}">
+            <button class="button-greyed-out" th:text="'Replies: ' + ${p.repliesCount}"></button>
         </a>
     </div>
-</body>
+    <form th:action="@{/reply(postId=${p.id})}" th:object="${newReply}" method="post">
+        <input th:field="*{content}" placeholder="Write a reply..." />
+        <button class="button">Reply</button>
+    </form>
+</div>
 
 </html>

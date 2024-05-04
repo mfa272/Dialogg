@@ -8,7 +8,11 @@ import com.mfa272.dialogg.services.AccountService;
 import com.mfa272.dialogg.services.AccountService.OperationResult;
 import com.mfa272.dialogg.services.PostService;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -34,34 +38,43 @@ public class AuthenticationController {
     public String showLoginPage(Model model) {
         return "login";
     }
-    
+
     @GetMapping("/failedLogin")
     public String showFailedLoginPage(Model model) {
-        model.addAttribute("errorMessage", "Wrong credentials");
+        model.addAttribute("errorMessage", "Invalid credentials");
         return "login";
     }
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
-        model.addAttribute("user", new AccountDTO());
+        if (!model.containsAttribute("user")) {
+            model.addAttribute("user", new AccountDTO());
+        }
         return "register";
     }
 
     @PostMapping("/register")
-    public String registerUserAccount(@ModelAttribute("user") @Validated({RegistrationForm.class}) AccountDTO userDto,
+    public String registerUserAccount(@ModelAttribute("user") @Validated({ RegistrationForm.class }) AccountDTO userDto,
             BindingResult result,
             RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            return "register";
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage", result.getAllErrors().get(0).getDefaultMessage());
+            redirectAttributes.addFlashAttribute("user", userDto);
+            return "redirect:/register";
         }
         OperationResult registered = accountService.registerUser(userDto);
         if (registered == OperationResult.USERNAME_TAKEN) {
-            result.rejectValue("username", "user.username", "Username already taken");
-            return "register";
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage", "Username already taken");
+            redirectAttributes.addFlashAttribute("user", userDto);
+            return "redirect:/register";
         }
         if (registered == OperationResult.EMAIL_TAKEN) {
-            result.rejectValue("email", "user.email", "Email already taken");
-            return "register";
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage", "Email already taken");
+            redirectAttributes.addFlashAttribute("user", userDto);
+            return "redirect:/register";
         }
         redirectAttributes.addFlashAttribute("successMessage", "You have successfully registered!");
         return "redirect:/login";
@@ -75,44 +88,55 @@ public class AuthenticationController {
         model.addAttribute("user", dto);
         return "settings";
     }
-    
+
     @PostMapping("/updateEmail")
-    public String updateEmail(@ModelAttribute("user") @Validated({UpdateEmailForm.class}) AccountDTO accountDto, BindingResult result, RedirectAttributes redirectAttributes) {
+    public String updateEmail(@ModelAttribute("user") @Validated({ UpdateEmailForm.class }) AccountDTO accountDto,
+            BindingResult result, RedirectAttributes redirectAttributes) {
         Optional<String> username = accountService.getCurrentUsername();
         if (result.hasErrors()) {
             accountDto.setCurrentEmail(accountService.getEmailByUsername(username.get()));
-            return "settings";
+            redirectAttributes.addFlashAttribute("user", accountDto);
+            redirectAttributes.addFlashAttribute("errorMessage", result.getAllErrors().get(0).getDefaultMessage());
+            return "redirect:/settings";
         }
         OperationResult r = accountService.updateEmail(username.get(), accountDto.getEmail());
-        if (r == OperationResult.EMAIL_TAKEN){
-            accountDto.setCurrentEmail(accountService.getEmailByUsername(username.get()));
-            result.rejectValue("email", "user.email", "Email already taken");
-            return "settings";
-        }else if (r == OperationResult.FAILURE){
-            accountDto.setCurrentEmail(accountService.getEmailByUsername(username.get()));
-            result.rejectValue("email", "user.email", "Error");
-            return "settings";
+        accountDto.setCurrentEmail(accountService.getEmailByUsername(username.get()));
+        if (r == OperationResult.EMAIL_TAKEN) {
+            redirectAttributes.addFlashAttribute("user", accountDto);
+            redirectAttributes.addFlashAttribute("errorMessage", "Email already taken");
+            return "redirect:/settings";
+        } else if (r == OperationResult.FAILURE) {
+            redirectAttributes.addFlashAttribute("user", accountDto);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error");
+            return "redirect:/settings";
         }
+        redirectAttributes.addFlashAttribute("user", accountDto);
         redirectAttributes.addFlashAttribute("successMessage", "Email updated successfully!");
         return "redirect:/settings";
     }
 
     @PostMapping("/updatePassword")
-    public String updatePassword(@ModelAttribute("user") @Validated({UpdatePasswordForm.class}) AccountDTO accountDto, BindingResult result, RedirectAttributes redirectAttributes) {
+    public String updatePassword(@ModelAttribute("user") @Validated({ UpdatePasswordForm.class }) AccountDTO accountDto,
+            BindingResult result, RedirectAttributes redirectAttributes) {
         Optional<String> username = accountService.getCurrentUsername();
+        accountDto.setCurrentEmail(accountService.getEmailByUsername(username.get()));
         if (result.hasErrors()) {
-            accountDto.setCurrentEmail(accountService.getEmailByUsername(username.get()));
-            return "settings";
+            redirectAttributes.addFlashAttribute("user", accountDto);
+            redirectAttributes.addFlashAttribute("errorMessage", result.getAllErrors().get(0).getDefaultMessage());
+            return "redirect:/settings";
         }
+        redirectAttributes.addFlashAttribute("user", accountDto);
         accountService.updatePassword(username.get(), accountDto.getPassword());
         redirectAttributes.addFlashAttribute("successMessage", "Password updated successfully!");
         return "redirect:/settings";
     }
 
     @PostMapping("/deleteAccount")
-    public String deleteAccount(RedirectAttributes redirectAttributes){
+    public String deleteAccount(RedirectAttributes redirectAttributes, HttpServletRequest request,
+            HttpServletResponse response) {
         Optional<String> username = accountService.getCurrentUsername();
         accountService.deleteAccount(username.get());
+        new SecurityContextLogoutHandler().logout(request, response, null);
         redirectAttributes.addFlashAttribute("successMessage", "Account deleted succesfully!");
         return "redirect:/login";
     }

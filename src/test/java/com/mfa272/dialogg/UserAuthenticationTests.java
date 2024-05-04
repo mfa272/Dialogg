@@ -62,9 +62,9 @@ class UserAuthenticationTests {
 				.param("email", "nottest@nottest.nottest")
 				.param("password", "password")
 				.with(csrf()))
-				.andExpect(status().isOk())
-				.andExpect(view().name("register"))
-				.andExpect(model().attributeHasFieldErrors("user", "username"));
+				.andExpect(status().is3xxRedirection())
+				.andExpect(view().name("redirect:/register"))
+				.andExpect(flash().attribute("errorMessage", "Username already taken"));
 	}
 
 	@Test
@@ -83,9 +83,9 @@ class UserAuthenticationTests {
 				.param("email", "test@test.test")
 				.param("password", "password")
 				.with(csrf()))
-				.andExpect(status().isOk())
-				.andExpect(view().name("register"))
-				.andExpect(model().attributeHasFieldErrors("user", "email"));
+				.andExpect(status().is3xxRedirection())
+				.andExpect(view().name("redirect:/register"))
+				.andExpect(flash().attribute("errorMessage", "Email already taken"));
 	}
 
 	@Test
@@ -103,7 +103,7 @@ class UserAuthenticationTests {
 				.param("password", "password")
 				.with(csrf()))
 				.andExpect(status().is3xxRedirection())
-				.andExpect(redirectedUrl("/posts/new"));
+				.andExpect(redirectedUrl("/"));
 	}
 
 	@Test

@@ -1,0 +1,17 @@
+.component-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    height: 100vh;
+    width: 100%;
+    margin-left: 33%;
+    margin-right: 33%;
+}
+
+.username {
+    margin-top: 80px;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    font-size: 18px;
+}

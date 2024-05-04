@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -73,7 +74,7 @@ public class PostTests {
                                 .param("content", "this is a test post")
                                 .with(csrf()))
                                 .andExpect(status().is3xxRedirection())
-                                .andExpect(view().name("redirect:/" + username));
+                                .andExpect(view().name("redirect:/" + username + "/profile"));
         }
 
         @Test
@@ -83,12 +84,12 @@ public class PostTests {
                                 .param("content", "this is a test post")
                                 .with(csrf()))
                                 .andExpect(status().is3xxRedirection())
-                                .andExpect(view().name("redirect:/login"));
+                                .andExpect(redirectedUrlPattern("**/login"));
         }
 
         @Test
         void fetchSecondPage() throws Exception {
-                MvcResult result = mockMvc.perform(get("/{username}", username)
+                MvcResult result = mockMvc.perform(get("/{username}/profile", username)
                                 .session(session)
                                 .param("page", "1"))
                                 .andExpect(status().isOk())
@@ -158,7 +159,7 @@ public class PostTests {
                                 .param("content", postContent)
                                 .with(csrf()));
 
-                MvcResult result = mockMvc.perform(get("/")
+                MvcResult result = mockMvc.perform(get("/username/profile")
                                 .session(session))
                                 .andExpect(status().isOk())
                                 .andReturn();
@@ -172,7 +173,7 @@ public class PostTests {
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(view().name("redirect:/"));
 
-                result = mockMvc.perform(get("/")
+                result = mockMvc.perform(get("/username/profile")
                                 .session(session))
                                 .andExpect(status().isOk())
                                 .andReturn();
@@ -246,7 +247,7 @@ public class PostTests {
                                 .param("email", "username3@email.com")
                                 .param("password", "password3")
                                 .with(csrf()));
-                                
+
                 MvcResult loginResult = mockMvc.perform(post("/login")
                                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                                 .param("username", "username2")
@@ -317,8 +318,31 @@ public class PostTests {
                 }
 
                 assert (count == 3);
+                mockMvc.perform(post("/unlike")
+                                .session(session2)
+                                .param("postId", "1")
+                                .with(csrf()))
+                                .andExpect(status().is3xxRedirection());
 
-                findStr = "Unlike";
+                mockMvc.perform(post("/unlike")
+                                .session(session2)
+                                .param("replyId", "1")
+                                .with(csrf()))
+                                .andExpect(status().is3xxRedirection());
+
+                mockMvc.perform(post("/unlike")
+                                .session(session2)
+                                .param("replyId", "2")
+                                .with(csrf()))
+                                .andExpect(status().is3xxRedirection());
+                result = mockMvc.perform(get("/thread/1?replyId=1")
+                                .session(session2)
+                                .with(csrf()))
+                                .andExpect(status().isOk())
+                                .andReturn();
+                content = result.getResponse().getContentAsString();
+
+                findStr = "Likes: 1";
                 lastIndex = 0;
                 count = 0;
                 while (lastIndex != -1) {

@@ -16,8 +16,8 @@ public class AccountDTO {
     public interface UpdatePasswordForm {
     }
 
-    @Size(max = 16, message = "Maximum 16 characters", groups = { RegistrationForm.class })
-    @Size(min = 4, message = "Minimum 6 characters", groups = { RegistrationForm.class })
+    @Size(max = 16, message = "Maximum 16 characters in the username", groups = { RegistrationForm.class })
+    @Size(min = 4, message = "Minimum 4 characters in the username", groups = { RegistrationForm.class })
     @NotBlank(message = "Username is required", groups = { RegistrationForm.class })
     @Pattern(regexp = "^[a-zA-Z0-9._]+$", message = "Username contains unallowed characters", groups = {
             RegistrationForm.class })
@@ -27,8 +27,8 @@ public class AccountDTO {
     @NotBlank(message = "Email is required", groups = { UpdateEmailForm.class, RegistrationForm.class })
     private String email;
 
-    @Size(max = 16, message = "Maximum 16 characters", groups = { UpdatePasswordForm.class, RegistrationForm.class })
-    @Size(min = 6, message = "Minimum 6 characters", groups = { UpdatePasswordForm.class, RegistrationForm.class })
+    @Size(max = 16, message = "Maximum 16 characters in the password", groups = { UpdatePasswordForm.class, RegistrationForm.class })
+    @Size(min = 6, message = "Minimum 6 characters in the password", groups = { UpdatePasswordForm.class, RegistrationForm.class })
     @Pattern(regexp = "^[\\S]*$", message = "Password must not contain whitespaces", groups = {
             UpdatePasswordForm.class, RegistrationForm.class })
     private String password;

@@ -1,22 +1,30 @@
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.thymeleaf.org">
+    
 <head>
-    <title>Login Form</title>
+    <title>Login</title>
+    <link rel="stylesheet" href="../static/styles.css" type="text/css" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="../static/styles.css" type="text/css" th:href="@{/css/forms.css}">
+
 </head>
 
 <body>
-    <div th:if="${successMessage}" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" th:text="${errorMessage}"></div>
-    <form th:action="@{/login}" method="post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-
-        <input type="submit" value="Login">
-    </form>
+    <div th:replace="~{fragments.html :: topbar}"></div>
+    <div class="centered-container">
+        <div>
+            <form class="container" th:action="@{/login}" method="post">
+                <div>Username<br>
+                    <input id="username" name="username">
+                </div>
+                <div>Password<br>
+                    <input type="password" id="password" name="password">
+                </div>
+                <button class="button">Login</Button>
+            </form>
+        </div>
+        <div class="success" th:if="${successMessage}" th:text="${successMessage}"></div>
+        <div class="error" th:if="${errorMessage}" th:text="${errorMessage}" />
+    </div>
 </body>
 
 </html>

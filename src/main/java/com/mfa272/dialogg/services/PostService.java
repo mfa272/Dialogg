@@ -21,6 +21,7 @@ import com.mfa272.dialogg.entities.Reply;
 import com.mfa272.dialogg.repositories.ReplyRepository;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Service
 public class PostService {
@@ -95,6 +96,7 @@ public class PostService {
                 rdto.setId(r.getId());
                 rdto.setContent(r.getContent());
                 rdto.setCreatedAt(r.getCreatedAt());
+                rdto.setTimePassed(getTimePassedSince(r.getCreatedAt()));
                 rdto.setUsername(r.getAccount().getUsername());
                 rdto.setRepliesCount(replyRepository.countRepliesByReply(r));
                 rdto.setThreadId(postId);
@@ -116,6 +118,7 @@ public class PostService {
             rdto.setId(r.getId());
             rdto.setContent(r.getContent());
             rdto.setCreatedAt(r.getCreatedAt());
+            rdto.setTimePassed(getTimePassedSince(r.getCreatedAt()));
             rdto.setUsername(r.getAccount().getUsername());
             rdto.setRepliesCount(replyRepository.countRepliesByReply(r));
             rdto.setThreadId(r.getParentPost().getId());
@@ -163,6 +166,7 @@ public class PostService {
         dto.setId(post.getId());
         dto.setContent(post.getContent());
         dto.setCreatedAt(post.getCreatedAt());
+        dto.setTimePassed(getTimePassedSince(post.getCreatedAt()));
         dto.setUsername(post.getAccount().getUsername());
         dto.setRepliesCount(replyRepository.countRepliesByPost(post));
         dto.setLikesCount(postRepository.countLikesByPost_Id(post.getId()));
@@ -188,6 +192,15 @@ public class PostService {
     public boolean deleteReply(Long replyId) {
         Optional<Reply> reply = replyRepository.findById(replyId);
         if (reply.isPresent()) {
+            Page<Reply> repliesToReply;
+            int i = 0;
+            do {
+                repliesToReply = replyRepository.findByParentReply_IdOrderByCreatedAtDesc(
+                        replyId, PageRequest.of(i, 10));
+                for(Reply r : repliesToReply){
+                    replyRepository.delete(r);
+                }
+            } while (!repliesToReply.isEmpty());
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
             if (reply.get().getAccount().getUsername().equals(currentUsername)) {
                 replyRepository.delete(reply.get());
@@ -195,74 +208,6 @@ public class PostService {
             }
         }
         return false;
-    }
-
-    @Transactional
-    public boolean likePost(Long postId) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Post> post = postRepository.findById(postId);
-        Optional<Account> account = accountRepository.findByUsername(username);
-
-        if (!(post.isPresent()) || !(account.isPresent())) {
-            return false;
-        }
-        if (post.get().getAccount().getUsername().equals(username)) {
-            return false;
-        }
-        Post p = post.get();
-        p.likePost(account.get());
-        return true;
-    }
-
-    @Transactional
-    public boolean unlikePost(Long postId) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Post> post = postRepository.findById(postId);
-        Optional<Account> account = accountRepository.findByUsername(username);
-
-        if (!(post.isPresent()) || !(account.isPresent())) {
-            return false;
-        }
-        if (post.get().getAccount().getUsername().equals(username)) {
-            return false;
-        }
-        Post p = post.get();
-        p.unlikePost(account.get());
-        return true;
-    }
-
-    @Transactional
-    public boolean likeReply(Long replyId) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Reply> reply = replyRepository.findById(replyId);
-        Optional<Account> account = accountRepository.findByUsername(username);
-
-        if (!(reply.isPresent()) || !(account.isPresent())) {
-            return false;
-        }
-        if (reply.get().getAccount().getUsername().equals(username)) {
-            return false;
-        }
-        Reply p = reply.get();
-        p.likeReply(account.get());
-        return true;
-    }
-
-    @Transactional
-    public boolean unlikeReply(Long replyId) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Reply> reply = replyRepository.findById(replyId);
-        Optional<Account> account = accountRepository.findByUsername(username);
-
-        if (!(reply.isPresent()) || !(account.isPresent())) {
-            return false;
-        }
-        if (reply.get().getAccount().getUsername().equals(username)) {
-            return false;
-        }
-        Reply p = reply.get();
-        p.unlikeReply(account.get());
-        return true;
     }
 
     public FeedResponse getUserFeed(String username, LocalDateTime lastFollowedDate, LocalDateTime lastOtherDate) {
@@ -275,12 +220,18 @@ public class PostService {
             followedPosts = getFollowedPosts(username, 0, 10);
         } else {
             followedPosts = getFollowedPostsBeforeDate(username, lastFollowedDate, 0, 10);
+            if (!followedPosts.hasContent()) {
+                followedPosts = getFollowedPosts(username, 0, 10);
+            }
         }
 
         if (lastOtherDate == null) {
             otherPosts = getNotFollowedPosts(username, 0, 10);
         } else {
             otherPosts = getNotFollowedPostsBeforeDate(username, lastOtherDate, 0, 10);
+            if (!otherPosts.hasContent()) {
+                otherPosts = getNotFollowedPosts(username, 0, 10);
+            }
         }
 
         ArrayList<PostDTO> followedContent = new ArrayList<>(followedPosts.getContent());
@@ -294,10 +245,21 @@ public class PostService {
             }
             for (int i = 0; i < 3 && !notFollowedContent.isEmpty() && mergedPosts.size() < 10; i++) {
                 PostDTO post = notFollowedContent.remove(0);
-                if (!post.getUsername().equals(username)) {
-                    mergedPosts.add(post);
-                    lastOtherDate = post.getCreatedAt();
-                }
+                mergedPosts.add(post);
+                lastOtherDate = post.getCreatedAt();
+            }
+            if (lastFollowedDate == null) {
+                followedContent = new ArrayList<>();
+            } else {
+                followedContent = new ArrayList<>(
+                        getFollowedPostsBeforeDate(username, lastFollowedDate, 0, 10).getContent());
+            }
+
+            if (lastOtherDate == null) {
+                notFollowedContent = new ArrayList<>();
+            } else {
+                notFollowedContent = new ArrayList<>(
+                        getNotFollowedPostsBeforeDate(username, lastOtherDate, 0, 10).getContent());
             }
         }
 
@@ -309,5 +271,23 @@ public class PostService {
         posts = new PageImpl<>(mergedPosts, PageRequest.of(0, size),
                 hasNext ? 11 : mergedPosts.size());
         return new FeedResponse(posts, lastFollowedDate, lastOtherDate);
+    }
+
+    private String getTimePassedSince(LocalDateTime createdAt) {
+        LocalDateTime now = LocalDateTime.now();
+        long years = ChronoUnit.YEARS.between(createdAt, now);
+        if (years > 0) {
+            return years + "y";
+        }
+        long days = ChronoUnit.DAYS.between(createdAt, now);
+        if (days > 0) {
+            return days + "d";
+        }
+        long hours = ChronoUnit.HOURS.between(createdAt, now);
+        if (hours > 0) {
+            return hours + "h";
+        }
+        long minutes = ChronoUnit.MINUTES.between(createdAt, now);
+        return minutes + "m";
     }
 }

@@ -63,7 +63,7 @@ public class FollowTests {
                 .andReturn();
         String content = result.getResponse().getContentAsString();
         for (int i = 10; i > 0; i--) {
-            assert (content.contains("<div>" + "username" + i + "</div>"));
+            assert (content.contains("username" + i));
         }
     }
 

@@ -9,6 +9,8 @@ import com.mfa272.dialogg.services.PostService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.Optional;
 import java.time.LocalDateTime;
 
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -38,7 +41,10 @@ public class PagesController {
     @GetMapping("/")
     public String showHome(Model model,
             @RequestParam(required = false) boolean next,
-            HttpSession session, HttpServletResponse response) {
+            HttpSession session, HttpServletResponse response,
+            @RequestHeader(value = "Referer", required = false) String referer) {
+
+        model.addAttribute("newPost", new PostDTO());
 
         LocalDateTime sessionFollowedDate = null;
         LocalDateTime sessionNotFollowedDate = null;
@@ -46,6 +52,16 @@ public class PagesController {
             sessionFollowedDate = (LocalDateTime) session.getAttribute("feedFollowedDate");
             sessionNotFollowedDate = (LocalDateTime) session.getAttribute("feedOtherDate");
         }
+
+        if (referer != null) {
+            Pattern pattern = Pattern.compile("https?://[^/]+/(\\?hasNext)?");
+            Matcher matcher = pattern.matcher(referer);
+            if (!matcher.matches()) {
+                sessionFollowedDate = null;
+                sessionNotFollowedDate = null;
+            }
+        }
+
         Optional<String> username = accountService.getCurrentUsername();
         if (username.isPresent()) {
             FeedResponse fr = postService.getUserFeed(username.get(), sessionFollowedDate, sessionNotFollowedDate);
@@ -56,6 +72,9 @@ public class PagesController {
             Page<PostDTO> posts;
             if (sessionNotFollowedDate != null) {
                 posts = postService.getPostsBeforeDate(sessionNotFollowedDate, 10);
+                if (!posts.hasContent()) {
+                    posts = postService.getPosts(0, 10);
+                }
             } else {
                 posts = postService.getPosts(0, 10);
             }
@@ -66,6 +85,7 @@ public class PagesController {
             model.addAttribute("posts", posts);
         }
         model.addAttribute("newReply", new PostDTO());
+        model.addAttribute("newPost", new PostDTO());
         return "home";
     }
 
@@ -81,7 +101,10 @@ public class PagesController {
             model.addAttribute("followers", followers);
             Page<AccountDTO> followed = accountService.getFollowing(username, 0, 5);
             model.addAttribute("followed", followed);
-
+            long followersCount = accountService.countFollowers(username);
+            model.addAttribute("followersCount", followersCount);
+            long followingCount = accountService.countFollowing(username);
+            model.addAttribute("followingCount", followingCount);
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (!(authentication instanceof AnonymousAuthenticationToken)) {
                 String currentUsername = authentication.getName();
@@ -127,6 +150,7 @@ public class PagesController {
         Optional<PostDTO> post = postService.getPostById(postId);
         Page<PostDTO> replies = postService.getRepliesByPost(postId, page, 10);
         model.addAttribute("post", post.get());
+        model.addAttribute("newPost", new PostDTO());
         model.addAttribute("newReply", new PostDTO());
         model.addAttribute("replies", replies);
 

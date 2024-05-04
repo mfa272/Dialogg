@@ -1,31 +1,37 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+<html>
 
 <head>
-    <title>Account Settings</title>
+    <title>Account settings</title>
+    <link rel="stylesheet" href="../static/styles.css" type="text/css" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="../static/styles.css" type="text/css" th:href="@{/css/forms.css}">
 </head>
 
 <body>
-    Account Settings
-    <div th:if="${successMessage}" th:text="${successMessage}"/>
-    <form th:action="@{/updateEmail}" th:object="${user}" method="post">
-        <div th:text="'Current Email: ' + *{currentEmail}" />
-        New Email:
-        <input th:field="*{email}">
-        <button>Update Email</button>
-        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-    </form>
-    <br>
-    <form th:action="@{/updatePassword}" th:object="${user}" method="post">
-        New Password:
-        <input type="password" th:field="*{password}">
-        <button>Update Password</button>
-        <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
-    </form>
-    <br>
-    <form th:action="@{/deleteAccount}" method="post">
-        <button>Delete Account</button>
-    </form>
+    <div th:replace="~{fragments.html :: topbar}"></div>
+    <div class="centered-container">
+        <div class="container">
+            <form th:action="@{/updateEmail}" th:object="${user}" method="post">
+                <div style="font-family: 'Arial', sans-serif" th:text="'Current Email: ' + *{currentEmail}" />
+                <div style="font-family: 'Arial', sans-serif">New Email:</div>
+                <div><input th:field="*{email}">
+                    <button class="button">Update Email</button>
+                </div>
+            </form>
+            <form th:action="@{/updatePassword}" th:object="${user}" method="post">
+                <div style="font-family: 'Arial', sans-serif">New Password:</div>
+                <div><input type="password" th:field="*{password}">
+                    <button class="button">Update Password</button>
+                </div>
+            </form>
+            <form th:action="@{/deleteAccount}" method="post">
+                <button class="button">Delete Account</button>
+            </form>
+        </div>
+        <div class="success" th:if="${successMessage}" th:text="${successMessage}"></div>
+        <div class="error" th:if="${errorMessage}" th:text="${errorMessage}" />
+    </div>
 </body>
 
 </html>

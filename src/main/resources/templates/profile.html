@@ -2,46 +2,71 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>User Profile</title>
+    <link rel="stylesheet" href="../static/styles.css" type="text/css" th:href="@{/css/styles.css}">
+    <title th:text="${username}">User</title>
 </head>
 
 <body>
-    <div th:text="${username}"></div>
-    <div th:if="${username == #authentication.name}" th:insert="fragments.html :: submitPost"></div>
-    <div th:unless="${username == #authentication.name}">
-        <div th:if="${following}">
-            <form th:action="@{/unfollow/{username}(username=${username})}" method="post">
-                <button>Unfollow!</button>
-            </form>
+    <div th:replace="~{fragments.html :: topbar}"></div>
+    <div class="content-container">
+        <div th:replace="~{fragments.html :: left-column}" />
+        <div class="grid">
+            <div></div>
+            <div class="column-center">
+                <div class="username-container" style="display: flex; gap: 10px; padding: 10px; 
+                    font-family: 'Arial', sans-serif; align-self: flex-end;">
+                    <div th:unless="${username == #authentication.name}">
+                        <div th:if="${following}">
+                            <form th:action="@{/unfollow/{username}(username=${username})}" method="post">
+                                <button class="button">Unfollow</button>
+                            </form>
+                        </div>
+                        <div th:unless="${following}">
+                            <form th:action="@{/follow/{username}(username=${username})}" method="post">
+                                <button class="button">Follow</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div style="font-size: 24px; font-weight: bold;" th:text="${username}"></div>
+                </div>
+                <div class="no-posts" th:if="${posts.isEmpty()}">
+                    No posts
+                </div>
+                <div th:each="p : ${posts}">
+                    <div th:replace="fragments.html :: post (${p})"></div>
+                </div>
+                <div th:if="${posts.hasNext()}">
+                    <a class="show-more"
+                        th:href="@{/{username}/profile(username=${username}, page=${posts.number + 1})}">Show older
+                        posts</a>
+                </div>
+                <div th:if="${posts.number > 0}">
+                    <a class="show-more"
+                        th:href="@{/{username}/profile(username=${username}, page=${posts.number - 1})}">Back</a>
+                </div>
+
+            </div>
         </div>
-        <div th:unless="${following}">
-            <form th:action="@{/follow/{username}(username=${username})}" method="post">
-                <button>Follow!</button>
-            </form>
+        <div class="column-follow">
+            <div class="followers-section" th:if="${!followers.isEmpty()}">
+                <a class="followers-link" th:href="@{/{username}/followers(username=${username})}"
+                    th:text="'Followers (' + ${followersCount} + ')'"></a>
+                <div th:each="follower : ${followers}">
+                    <a class="followers-text" th:href="@{/{username}/profile(username=${follower.username})}">
+                        <div th:text="${follower.username}"></div>
+                    </a>
+                </div>
+            </div>
+            <div class="following-section" th:if="${!followed.isEmpty()}">
+                <a class="followers-link" th:href="@{/{username}/followed(username=${username})}"
+                    th:text="'Following (' + ${followingCount} + ')'"></a>
+                <div th:each="follow : ${followed}">
+                    <a class="followers-text" th:href="@{/{username}/profile(username=${follow.username})}">
+                        <div th:text="${follow.username}"></div>
+                    </a>
+                </div>
+            </div>
         </div>
-    </div>
-    Posts
-    <div th:each="p : ${posts}">
-        <div th:replace="fragments.html :: post (${p})"></div>
-    </div>
-    <div th:if="${posts.hasNext()}">
-        <a th:href="@{/{username}(username=${username}, page=${posts.number + 1})}">Load More</a>
-    </div>
-    <div th:if="${posts.number > 0}"> <a
-            th:href="@{/{username}(username=${username}, page=${posts.number - 1})}">Back</a></div>
-    <br>
-    <a th:href="@{/{username}/followers(username=${username})}">Followers</a>
-    <div th:each="follower : ${followers}">
-        <a th:href="@{/{username}(username=${follower.username})}">
-            <div th:text="${follower.username}"></div>
-        </a>
-    </div>
-    <br>
-    <a th:href="@{/{username}/followed(username=${username})}">Following</a>
-    <div th:each="follow : ${followed}">
-        <a th:href="@{/{username}(username=${follow.username})}">
-            <div th:text="${follow.username}"></div>
-        </a>
     </div>
 </body>
 

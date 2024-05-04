@@ -1,7 +1,11 @@
 package com.mfa272.dialogg.services;
 
 import com.mfa272.dialogg.entities.Account;
+import com.mfa272.dialogg.entities.Post;
+import com.mfa272.dialogg.entities.Reply;
 import com.mfa272.dialogg.repositories.AccountRepository;
+import com.mfa272.dialogg.repositories.PostRepository;
+import com.mfa272.dialogg.repositories.ReplyRepository;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +18,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -29,11 +34,16 @@ public class AccountService {
     }
 
     private final AccountRepository userRepository;
+    private final PostRepository postRepository;
+    private final ReplyRepository replyRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AccountService(AccountRepository userRepository, PasswordEncoder passwordEncoder, PostService postService) {
+    public AccountService(AccountRepository userRepository, PasswordEncoder passwordEncoder, PostService postService,
+            PostRepository postRepository, ReplyRepository replyRepository) {
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
+        this.replyRepository = replyRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -147,6 +157,74 @@ public class AccountService {
     }
 
     @Transactional
+    public boolean likePost(Long postId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Post> post = postRepository.findById(postId);
+        Optional<Account> account = userRepository.findByUsername(username);
+
+        if (!(post.isPresent()) || !(account.isPresent())) {
+            return false;
+        }
+        if (post.get().getAccount().getUsername().equals(username)) {
+            return false;
+        }
+        Post p = post.get();
+        p.likePost(account.get());
+        return true;
+    }
+
+    @Transactional
+    public boolean unlikePost(Long postId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Post> post = postRepository.findById(postId);
+        Optional<Account> account = userRepository.findByUsername(username);
+
+        if (!(post.isPresent()) || !(account.isPresent())) {
+            return false;
+        }
+        if (post.get().getAccount().getUsername().equals(username)) {
+            return false;
+        }
+        Post p = post.get();
+        p.unlikePost(account.get());
+        return true;
+    }
+
+    @Transactional
+    public boolean likeReply(Long replyId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Reply> reply = replyRepository.findById(replyId);
+        Optional<Account> account = userRepository.findByUsername(username);
+
+        if (!(reply.isPresent()) || !(account.isPresent())) {
+            return false;
+        }
+        if (reply.get().getAccount().getUsername().equals(username)) {
+            return false;
+        }
+        Reply p = reply.get();
+        p.likeReply(account.get());
+        return true;
+    }
+
+    @Transactional
+    public boolean unlikeReply(Long replyId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Reply> reply = replyRepository.findById(replyId);
+        Optional<Account> account = userRepository.findByUsername(username);
+
+        if (!(reply.isPresent()) || !(account.isPresent())) {
+            return false;
+        }
+        if (reply.get().getAccount().getUsername().equals(username)) {
+            return false;
+        }
+        Reply p = reply.get();
+        p.unlikeReply(account.get());
+        return true;
+    }
+
+    @Transactional
     public OperationResult deleteAccount(String username) {
         int following = (int) countFollowing(username);
         if (following > 0) {
@@ -159,6 +237,13 @@ public class AccountService {
             for (AccountDTO u : getFollowers(username, 0, followers)) {
                 unfollow(u.getUsername(), username);
             }
+        }
+        Account a = userRepository.findByUsername(username).get();
+        for (Post p : a.getLikedPosts()){
+            unlikePost(p.getId());
+        }
+        for (Reply r : a.getLikedReplies()){
+            unlikeReply(r.getId());
         }
         userRepository.deleteByUsername(username);
         return OperationResult.SUCCESS;

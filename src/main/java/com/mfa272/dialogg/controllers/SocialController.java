@@ -46,14 +46,13 @@ public class SocialController {
 
     @PostMapping("/new")
     public String createPost(@ModelAttribute("newPost") @Valid PostDTO postDTO, BindingResult result,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes, @RequestHeader(value = "Referer", required = false) String referer) {
         Optional<String> currentUsername = accountService.getCurrentUsername();
         if (!result.hasErrors()) {
             postService.createPost(postDTO, currentUsername.get());
         } else {
-            redirectAttributes
-                    .addFlashAttribute("content", result.getFieldError("content")
-                            .getDefaultMessage());
+            redirectAttributes.addFlashAttribute("postError", result.getAllErrors().get(0).getDefaultMessage());
+            return "redirect:" + (referer != null ? referer : "/");
         }
         return "redirect:/" + currentUsername.get() + "/profile";
     }
@@ -77,10 +76,18 @@ public class SocialController {
     }
 
     @PostMapping("/reply")
-    public String postReply(@ModelAttribute("newReply") PostDTO replyDTO, @RequestParam Long postId,
-            @RequestParam(required = false) Long replyId) {
+    public String postReply(@ModelAttribute("newReply") @Valid PostDTO replyDTO, BindingResult result,
+            RedirectAttributes redirectAttributes,
+            @RequestParam Long postId,
+            @RequestParam(required = false) Long replyId,
+            @RequestHeader(value = "Referer", required = false) String referer) {
         String username = accountService.getCurrentUsername().get();
         boolean success;
+
+        if (result.hasErrors()) {
+            redirectAttributes.addFlashAttribute("postError", result.getAllErrors().get(0).getDefaultMessage());
+            return "redirect:" + (referer != null ? referer : "/");
+        }
 
         if (replyId != null) {
             success = postService.replyToReply(replyDTO, username, postId, replyId);
@@ -93,30 +100,42 @@ public class SocialController {
         } else if (success && replyId != null) {
             return "redirect:/thread/" + postId + "?replyId=" + String.valueOf(replyId);
         }
-        return "redirect:/";
+        redirectAttributes.addFlashAttribute("postError", "Error");
+        return "redirect:" + (referer != null ? referer : "/");
     }
 
     @PostMapping("/like")
     public String like(@RequestParam(required = false) Long postId, @RequestParam(required = false) Long replyId,
-            RedirectAttributes redirectAttributes,
-            @RequestHeader(value = "Referer", required = false) String referer) {
-        if (replyId == null) {
-            postService.likePost(postId);
-        } else if (postId == null) {
-            postService.likeReply(replyId);
+            @RequestParam(required = false) Long subreplyId,
+            RedirectAttributes redirectAttributes) {
+        if (replyId != null && subreplyId != null) {
+            accountService.likeReply(subreplyId);
+            return "redirect:/thread/" + postId + "?replyId=" + String.valueOf(replyId);
+        } else if (replyId != null) {
+            accountService.likeReply(replyId);
+            return "redirect:/thread/" + postId + "?replyId=" + String.valueOf(replyId);
+        } else if (postId != null) {
+            accountService.likePost(postId);
+            return "redirect:/thread/" + postId;
         }
-        return "redirect:" + (referer != null ? referer : "/");
+        return "redirect:/";
     }
 
     @PostMapping("/unlike")
     public String unlike(@RequestParam(required = false) Long postId, @RequestParam(required = false) Long replyId,
+            @RequestParam(required = false) Long subreplyId,
             RedirectAttributes redirectAttributes,
             @RequestHeader(value = "Referer", required = false) String referer) {
-        if (replyId == null) {
-            postService.unlikePost(postId);
-        } else if (postId == null) {
-            postService.unlikeReply(replyId);
+        if (replyId != null && subreplyId != null) {
+            accountService.unlikeReply(subreplyId);
+            return "redirect:/thread/" + postId + "?replyId=" + String.valueOf(replyId);
+        } else if (replyId != null) {
+            accountService.unlikeReply(replyId);
+            return "redirect:/thread/" + postId + "?replyId=" + String.valueOf(replyId);
+        } else if (postId != null) {
+            accountService.unlikePost(postId);
+            return "redirect:/thread/" + postId;
         }
-        return "redirect:" + (referer != null ? referer : "/");
+        return "redirect:/";
     }
 }

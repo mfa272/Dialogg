@@ -1,11 +1,30 @@
-<div sec:authorize="isAuthenticated()">
-    <form th:action="@{/logout}" method="post">
-        <button type="submit">Logout</button>
-    </form>
-  </div>
-<div th:each="p : ${posts}">
-    <div th:replace="~{fragments.html :: post (${p})}"></div>
-</div>
-<div th:if="${posts.hasNext()}">
-    <a th:href="@{/(next=true)}">Show older</a>
-</div>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <link rel="stylesheet" href="../static/styles.css" type="text/css" th:href="@{/css/styles.css}">
+    <title>dialogg</title>
+</head>
+
+<body>
+    <div th:replace="~{fragments.html :: topbar}"></div>
+    <div class="content-container">
+        <div th:replace="~{fragments.html :: left-column}" />
+        <div class="grid">
+            <div></div>
+            <div class="column-center">
+                <div th:each="p : ${posts}">
+                    <div th:replace="~{fragments.html :: post (${p})}"></div>
+                </div>
+                <div th:if="${posts.hasNext()}">
+                    <a class="show-more" th:href="@{/(next=true)}">Show older posts</a>
+                </div>
+                <div th:unless="${posts.hasNext()}">
+                    <a class="show-more-greyed-out">No older posts</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

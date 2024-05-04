@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Size;
 public class PostDTO {
 
     @Size(max = 140, message = "No more than 140 characters allowed")
-    @NotBlank(message = "Post can't be blank")
+    @NotBlank(message = "Can't be blank")
     private String content;
 
     private String username;
@@ -28,6 +28,8 @@ public class PostDTO {
     private Long likesCount;
 
     private boolean isLiked;
+
+    private String timePassed;
 
     public Long getThreadId() {
         return threadId;
@@ -99,5 +101,13 @@ public class PostDTO {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getTimePassed() {
+        return timePassed;
+    }
+
+    public void setTimePassed(String timePassed) {
+        this.timePassed = timePassed;
     }
 }

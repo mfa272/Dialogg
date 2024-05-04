@@ -2,23 +2,28 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>User Profile</title>
+    <link rel="stylesheet" href="../static/styles.css" type="text/css" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="../static/styles.css" type="text/css" th:href="@{/css/followers.css}">
+    <title th:text="${username}">Followers</title>
 </head>
 
 <body>
-    <div th:text="${username}"></div>
-    Following
-    <div th:text="${count}"></div>
-    <div th:each="f : ${followed}">
-        <a th:href="@{/{username}(username=${f.username})}">
-            <div th:text="${f.username}"></div>
-        </a>
-    </div>
-    <div th:if="${followed.hasNext()}">
-        <a th:href="@{/{username}/followed(username=${username}, page=${followed.number + 1})}">Load More</a>
-    </div>
-    <div th:if="${followed.number > 0}">
-        <a th:href="@{/{username}/followed(username=${username}, page=${followed.number - 1})}">Back</a>
+    <div th:replace="~{fragments.html :: topbar}"></div>
+    <div class="component-container">
+        <div class="username" th:text="${username}"></div>
+        <div class="followers-section" style="min-width: 30%" th:if="${!followed.isEmpty()}">
+            <div class="followers-link" th:text="'Following (' + ${count} + ')'"></div>
+            <div th:each="f : ${followed}">
+                <a class="followers-text" th:href="@{/{username}/profile(username=${f.username})}">
+                    <div th:text="${f.username}"></div>
+                </a>
+            </div>
+            <a class="followers-link" th:if="${followed.hasNext()}"
+                th:href="@{/{username}/followed(username=${username}, page=${followed.number + 1})}">Load More</a>
+
+            <a class="followers-link" th:if="${followed.number > 0}"
+                th:href="@{/{username}/followed(username=${username}, page=${followed.number - 1})}">Back</a>
+        </div>
     </div>
 </body>
 

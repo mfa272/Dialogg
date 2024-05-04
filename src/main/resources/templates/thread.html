@@ -2,84 +2,114 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <link rel="stylesheet" href="../static/styles.css" type="text/css" th:href="@{/css/styles.css}">
     <title>Thread</title>
 </head>
 
 <body>
-    Post
-
-    <div th:replace="fragments.html :: post (${post})"></div>
-
-    Replies
-    <div th:each="r : ${replies}">
-        <div th:if="${r.username == #authentication.name}">
-            <form th:action="@{/delete/{postId}(postId=${r.threadId}, replyId=${r.id})}" method="post">
-                <button>Delete</button>
-            </form>
-        </div>
-        <div th:text="${r.username}"></div>
-        <div th:text="${r.createdAt}"></div>
-        <div th:text="${r.content}"></div>
-        <form th:action="@{/reply(postId=${post.id}, replyId=${r.id})}" th:object="${newReply}" method="post">
-            <input th:field="*{content}" placeholder="Write a reply..." />
-            <button type="submit">Submit</button>
-        </form>
-        <a th:if="${r.repliesCount > 0}" th:href="@{/thread/{postId}(postId=${post.id}, replyId=${r.id})}">
-            <div th:text="'Replies: ' + ${r.repliesCount}"></div>
-        </a>
-        <div th:text="'Likes: ' + ${r.likesCount}"></div>
-        <div th:if="${r.username != #authentication.name}" sec:authorize="isAuthenticated()">
-            <div th:if="${!r.isLiked}">
-                <form th:action="@{/like(replyId=${r.id})}" method="post"><button>Like</form>
-            </div>
-            <div th:if="${r.isLiked}">
-                <form th:action="@{/unlike(replyId=${r.id})}" method="post"><button>Unlike</button></form>
-            </div>
-        </div>
-        <div th:if="${replyId == r.id}">
-            <div th:each="subReply : ${repliesToReply}">
-                <div th:if="${subReply.username == #authentication.name}">
-                    <form th:action="@{/delete/{postId}(postId=${subReply.threadId}, replyId=${subReply.id})}"
-                        method="post">
-                        <button>Delete</button>
-                    </form>
-                </div>
-                <div th:text="${subReply.username}"></div>
-                <div th:text="${subReply.createdAt}"></div>
-                <div th:text="${subReply.content}"></div>
-                <div th:text="'Likes: ' + ${subReply.likesCount}"></div>
-                <div th:if="${subReply.username != #authentication.name}" sec:authorize="isAuthenticated()">
-                    <div th:if="${!subReply.isLiked}">
-                        <form th:action="@{/like(replyId=${subReply.id})}" method="post"><button>Like</form>
+    <div th:replace="~{fragments.html :: topbar}"></div>
+    <div class="content-container">
+        <div th:replace="~{fragments.html :: left-column}" />
+        <div class="grid">
+            <div></div>
+            <div class="column-center">
+                <div th:replace="fragments.html :: post (${post})"></div>
+                <div th:each="r : ${replies}">
+                    <div class="post" style="padding-left:60px;">
+                        <div style="display: flex; justify-content: start; gap: 20px; align-items: baseline;">
+                            <a th:href="@{/{username}/profile(username=${r.username})}"
+                                style="text-decoration: none; color: black; font-weight: bold;"
+                                th:text="'@' + ${r.username}" />
+                            <div style="color: grey;" th:text="${r.timePassed}" />
+                            <div th:if="${r.username == #authentication.name}">
+                                <form th:action="@{/delete/{postId}(postId=${r.threadId}, replyId=${r.id})}"
+                                    method="post">
+                                    <button class="button">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div th:text="${r.content}"></div>
+                        <div style="display: flex; justify-content: start; gap: 20px;">
+                            <div th:if="${!r.isLiked}">
+                                <form th:action="@{/like(postId=${r.threadId}, replyId=${r.id})}" method="post">
+                                    <button class="button" th:text="'Likes: ' + ${r.likesCount}"></button>
+                                </form>
+                            </div>
+                            <div th:if="${r.isLiked}">
+                                <form th:action="@{/unlike(postId=${r.threadId}, replyId=${r.id})}" method="post">
+                                    <button class="like-button" th:text="'Likes: ' + ${r.likesCount}"></button>
+                                </form>
+                            </div>
+                            <a th:if="${r.repliesCount > 0}"
+                                th:href="@{/thread/{postId}(postId=${r.threadId}, replyId=${r.id})}">
+                                <button class="button" th:text="'Replies: ' + ${r.repliesCount}"></button>
+                            </a>
+                            <a th:if="${r.repliesCount <= 0}">
+                                <button class="button-greyed-out" th:text="'Replies: ' + ${r.repliesCount}"></button>
+                            </a>
+                        </div>
+                        <form th:action="@{/reply(postId=${post.id}, replyId=${r.id})}" th:object="${newReply}"
+                            method="post">
+                            <input th:field="*{content}" placeholder="Write a reply..." />
+                            <button class="button">Reply</button>
+                        </form>
                     </div>
-                    <div th:if="${subReply.isLiked}">
-                        <form th:action="@{/unlike(replyId=${subReply.id})}" method="post"><button>Unlike</button></form>
+                    <div style="box-sizing: border-box;" th:if="${replyId == r.id}">
+                        <div th:each="subReply : ${repliesToReply}">
+                            <div class="post" style="padding-left:100px">
+                                <div style="display: flex; justify-content: start; gap: 20px; align-items: baseline;">
+                                    <a th:href="@{/{username}/profile(username=${subReply.username})}"
+                                        style="text-decoration: none; color: black; font-weight: bold;"
+                                        th:text="'@' + ${subReply.username}" />
+                                    <div style="color: grey;" th:text="${subReply.timePassed}" />
+                                    <div th:if="${subReply.username == #authentication.name}">
+                                        <form
+                                            th:action="@{/delete/{postId}(postId=${subReply.threadId}, replyId=${subReply.id})}"
+                                            method="post">
+                                            <button class="button">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div th:text="${subReply.content}"></div>
+                                <div th:if="${!subReply.isLiked}">
+                                    <form
+                                        th:action="@{/like(postId=${subReply.threadId}, replyId=${r.id}, subreplyId=${subReply.id})}"
+                                        method="post">
+                                        <button class="button" th:text="'Likes: ' + ${subReply.likesCount}"></button>
+                                    </form>
+                                </div>
+                                <div th:if="${subReply.isLiked}">
+                                    <form
+                                        th:action="@{/unlike(postId=${subReply.threadId}, replyId=${r.id}, subreplyId=${subReply.id})}"
+                                        method="post">
+                                        <button class="like-button"
+                                            th:text="'Likes: ' + ${subReply.likesCount}"></button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-left:100px; display: flex;">
+                            <a th:if="${repliesToReply.number > 0}" class="show-more" style="font-size: 16px; width:100%"
+                                th:href="@{/thread/{postId}(postId=${post.id}, replyId=${r.id}, 
+                                page=${replies.number}, 
+                                subPage=${repliesToReply.number -1})}">Back</a>
+                            <a th:if="${repliesToReply.hasNext()}" class="show-more" style=" font-size: 16px; width:100%"
+                                th:href="@{/thread/{postId}(postId=${post.id}, replyId=${r.id}, 
+                                page=${replies.number}, 
+                                subPage=${repliesToReply.number + 1})}">Older replies</a>
+                        </div>
+
                     </div>
                 </div>
-                <div th:if="${repliesToReply.hasNext()}">
-                    <a th:href="@{/thread/{postId}(postId=${post.id}, replyId=${r.id}, 
-                    page=${replies.number}, 
-                    subPage=${repliesToReply.number + 1})}">Load
-                        More</a>
-                </div>
-                <div th:if="${repliesToReply.number > 0}">
-                    <a th:href="@{/thread/{postId}(postId=${post.id}, replyId=${r.id}, 
-                    page=${replies.number}, 
-                    subPage=${repliesToReply.number -1})}">Back</a>
-                    <br>
+                <div style="margin-left:60px; display: flex;">
+                    <a th:if="${replies.number > 0}" class="show-more" style="font-size: 16px; width:100%"
+                        th:href="@{/thread/{postId}(postId=${post.id}, page=${replies.number - 1})}">Back</a>
+                    <a th:if="${replies.hasNext()}" class="show-more" style=" font-size: 16px; width:100%"
+                        th:href="@{/thread/{postId}(postId=${post.id}, page=${replies.number + 1})}">Older replies</a>
                 </div>
             </div>
-        </div>
-        <div th:if="${replies.hasNext()}">
-            <a th:href="@{/thread/{postId}(postId=${post.id}, page=${replies.number + 1})}">Load
-                More</a>
-        </div>
-        <div th:if="${replies.number > 0}">
-            <a th:href="@{/thread/{postId}(postId=${post.id}, page=${replies.number - 1})}">Back</a>
-            <br>
         </div>
     </div>
-
 </body>
 
 </html>
