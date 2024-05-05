@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 
 public class PostDTO {
 
-    @Size(max = 140, message = "No more than 140 characters allowed")
+    @Size(max = 360, message = "No more than 360 characters allowed")
     @NotBlank(message = "Can't be blank")
     private String content;
 
