@@ -54,12 +54,12 @@ public class PagesController {
         }
 
         if (referer != null) {
-            Pattern pattern = Pattern.compile("https?://[^/]+/(\\?hasNext)?");
-            Matcher matcher = pattern.matcher(referer);
-            if (!matcher.matches()) {
-                sessionFollowedDate = null;
-                sessionNotFollowedDate = null;
-            }
+             Pattern pattern = Pattern.compile("https?://[^/]+/(\\?hasNext)?");
+             Matcher matcher = pattern.matcher(referer);
+             if (!matcher.matches()) {
+                 sessionFollowedDate = null;
+                 sessionNotFollowedDate = null;
+             }
         }
 
         Optional<String> username = accountService.getCurrentUsername();
