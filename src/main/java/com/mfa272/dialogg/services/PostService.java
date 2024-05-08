@@ -220,18 +220,12 @@ public class PostService {
             followedPosts = getFollowedPosts(username, 0, 10);
         } else {
             followedPosts = getFollowedPostsBeforeDate(username, lastFollowedDate, 0, 10);
-            if (!followedPosts.hasContent()) {
-                followedPosts = getFollowedPosts(username, 0, 10);
-            }
         }
 
         if (lastOtherDate == null) {
             otherPosts = getNotFollowedPosts(username, 0, 10);
         } else {
             otherPosts = getNotFollowedPostsBeforeDate(username, lastOtherDate, 0, 10);
-            if (!otherPosts.hasContent()) {
-                otherPosts = getNotFollowedPosts(username, 0, 10);
-            }
         }
 
         ArrayList<PostDTO> followedContent = new ArrayList<>(followedPosts.getContent());

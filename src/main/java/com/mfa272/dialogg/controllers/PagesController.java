@@ -53,15 +53,6 @@ public class PagesController {
             sessionNotFollowedDate = (LocalDateTime) session.getAttribute("feedOtherDate");
         }
 
-        if (referer != null) {
-             Pattern pattern = Pattern.compile("https?://[^/]+/(\\?hasNext)?");
-             Matcher matcher = pattern.matcher(referer);
-             if (!matcher.matches()) {
-                 sessionFollowedDate = null;
-                 sessionNotFollowedDate = null;
-             }
-        }
-
         Optional<String> username = accountService.getCurrentUsername();
         if (username.isPresent()) {
             FeedResponse fr = postService.getUserFeed(username.get(), sessionFollowedDate, sessionNotFollowedDate);
